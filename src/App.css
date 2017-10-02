@@ -1,0 +1,60 @@
+.App {
+  text-align: center;
+  /*position: relative; */
+}
+
+.SweetTricks {
+  position: absolute;
+  top: 100vh;
+  left: 0;
+  background: white;
+  height: 85vh;
+  width: 100vw;
+  transition: all .3s ease;
+}
+
+.SweetTricks.is-visible {
+  transform: translateY(-85vh);
+}
+
+.SweetTricks__heading {
+  padding-left: 12px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.SweetTricks__heading p {
+  text-align: left;
+  font-weight: 600;
+}
+
+.SweetTricks__heading p span {
+  text-align: left;
+  display: inline-block;
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.SweetTricks__heading p span:nth-child(3) {
+  font-weight: 400;
+  font-style: italic;
+}
+
+
+.SkateMap__prompt {
+  display: flex;
+  /*height: 15vh;*/
+  justify-content: center;
+  align-items: center;
+}
+
+.SkateMap__prompt h2 {
+  font-size: 16px;
+  font-weight: 400;
+}
+
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
