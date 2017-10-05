@@ -1,12 +1,23 @@
+// Import dependecies
 import React, { Component } from 'react';
-
-import SkateMap from './components/SkateMap';
 import uniqueId from 'lodash/uniqueId';
 
-import {GridList, GridTile} from 'material-ui/GridList';
+// Import Material-UI components
+import { GridList, GridTile } from 'material-ui/GridList';
 import IconButton from 'material-ui/IconButton';
+
+// Import material icons
 import ContentClear from 'material-ui/svg-icons/content/clear';
 import ActionPanTool from 'material-ui/svg-icons/action/pan-tool';
+
+import {
+    googleMapURL,
+    containerElementStyles,
+} from './google-map-settings.js';
+
+// Import our components
+import SkateMap from './components/SkateMap';
+
 
 import './App.css';
 
@@ -24,19 +35,21 @@ const styles = {
   },
 };
 
+
 class App extends Component {
 
   constructor(props){
     super(props);
     this.state = {
-      currentSpot: '',
+      currentSpotName: '',
       sweetTricksVisible: false,
       tilesData: this.props.tilesData,
     }
   }
 
+
   toggleSweetTricks = (value) => this.setState({
-    currentSpot: 'Sweet Spot #' + value,
+    currentSpotName: 'Sweet Spot #' + value,
     sweetTricksVisible: !this.state.sweetTricksVisible
   })
 
@@ -63,7 +76,7 @@ class App extends Component {
 
   render() {
     const {
-      currentSpot,
+      currentSpotName,
       sweetTricksVisible,
       tilesData
      } = this.state;
@@ -78,23 +91,18 @@ class App extends Component {
 
     return (
       <div className="App">
-        <div className="SkateMap">
-          <SkateMap
-            googleMapURL="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places&key=AIzaSyCahLFd-VW58iG7AxPhRTLNPcRGf9SeFPY"
-            loadingElement={<div style={{ height: `100%` }} />}
-            containerElement={<div style={{ height: `85vh` }} />}
-            mapElement={<div style={{ height: `100%` }} />}
-            isMarkerShown={true}
-            handleClick={this.toggleSweetTricks}
-          />
-          <div className="SkateMap__prompt">
-            <h2>Select a spot on the map brah</h2>
-          </div>
-        </div>
+        <SkateMap
+          googleMapURL={googleMapURL}
+          loadingElement={<div style={{ height: `100%` }} />}
+          containerElement={ <div style={ containerElementStyles } /> }
+          mapElement={<div style={{ height: `100%` }} />}
+          isMarkerShown={true}
+          handleClick={this.toggleSweetTricks}
+        />
 
         <div className={"SweetTricks " + (sweetTricksVisible ? "is-visible" : "")}>
           <div className="SweetTricks__heading">
-            <p>{currentSpot}<br /><span>
+            <p>{currentSpotName}<br /><span>
                 owned by:</span> <span>{" " + owner.name}
             </span>
           </p>
