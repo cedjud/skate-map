@@ -96,6 +96,15 @@ class App extends Component {
 
     const setPosition = (pos) => {
       console.log(pos);
+      console.log(this.skateMap);
+
+      const position = {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+      };
+
+      this.skateMap.panTo(position);
+
       this.setState({
         userLocation: {
           lat: pos.coords.latitude,
@@ -109,7 +118,7 @@ class App extends Component {
     }
 
     if ("geolocation" in navigator) {
-      console.log('geodude!')
+      console.log('geolocating...')
       navigator.geolocation.getCurrentPosition(setPosition);
     } else {
       console.log('not geodude :()')
@@ -119,6 +128,16 @@ class App extends Component {
 
   toggleCamera = () => {
     console.log('toggleCamera');
+  }
+
+  onMapMounted = (ref) => {
+    console.log('onMapMounted');
+    console.log(ref);
+    this.skateMap = ref;
+    console.log(this.skateMap);
+    let num = this.skateMap.getZoom();
+    console.log(num);
+    // panTo()
   }
 
 
@@ -149,6 +168,7 @@ class App extends Component {
           isMarkerShown={true}
           handleClick={this.toggleSweetTricks}
           userLocation={userLocation}
+          onMapMounted={this.onMapMounted}
         />
 
         <AppBottomNavigation
