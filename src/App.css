@@ -8,13 +8,13 @@
   top: 100vh;
   left: 0;
   background: white;
-  height: 85vh;
+  height: 100vh;
   width: 100vw;
   transition: all .3s ease;
 }
 
 .SweetTricks.is-visible {
-  transform: translateY(-85vh);
+  transform: translateY(-100%);
 }
 
 .SweetTricks__heading {
@@ -43,7 +43,6 @@
 
 .SkateMap__prompt {
   display: flex;
-  /*height: 15vh;*/
   justify-content: center;
   align-items: center;
 }
