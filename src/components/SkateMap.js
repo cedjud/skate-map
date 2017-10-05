@@ -1,6 +1,8 @@
 import React from 'react';
-import icon from  '../images/ic_whatshot_black_24dp_2x.png';
 import mapStyles from '../mapStyles.json';
+import uniqueId from 'lodash/uniqueId';
+import Whatshot from  '../images/ic_whatshot_black_24dp_2x.png';
+import AddLocation from  '../images/ic_add_location_black_24dp_2x.png';
 
 import {
   withScriptjs,
@@ -23,21 +25,22 @@ const SkateMap = withScriptjs( withGoogleMap( props =>
   >
     { props.isMarkerShown &&
       <div>
-        <Marker
-          onClick={() => props.handleClick(1)}
-          icon={icon}
-          position={{ lat: 40.70065, lng: -73.9292556 }}
-        />
-        <Marker
-          onClick={() => props.handleClick(2)}
-          icon={icon}
-          position={{ lat: 40.6998477, lng: -73.9210112 }}
-        />
-        <Marker
-          onClick={() => props.handleClick(3)}
-          icon={icon}
-          position={{ lat: 40.6954066, lng: -73.9240412 }} />
-      </div> }
+        { props.skateSpotsData.map( (skateSpot, index) => {
+          return (
+            <Marker
+              key={uniqueId()}
+              icon={skateSpot.fixed ? Whatshot : AddLocation}
+              onClick={
+                skateSpot.fixed ?
+                () => props.handleClick(index + 1) :
+                props.toggleNewSpotDialogue
+              }
+              position={skateSpot.position}
+            />
+          )
+        })}
+      </div>
+    }
   </GoogleMap>
 ))
 

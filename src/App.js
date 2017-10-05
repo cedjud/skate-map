@@ -56,6 +56,7 @@ class App extends Component {
       tilesData: this.props.tilesData,
       userLocation: null,
       fetchingLocation: false,
+      skateSpotsData: this.props.skateSpotsData,
     }
   }
 
@@ -95,21 +96,26 @@ class App extends Component {
     };
 
     const setPosition = (pos) => {
-      console.log(pos);
-      console.log(this.skateMap);
 
       const position = {
         lat: pos.coords.latitude,
         lng: pos.coords.longitude,
       };
 
+      const addSpotMarker = {
+        id: uniqueId(),
+        name: '',
+        position: position
+      }
+
+      const updatesSkateSpots = [...this.state.skateSpotsData];
+      updatesSkateSpots.push(addSpotMarker);
+
       this.skateMap.panTo(position);
 
       this.setState({
-        userLocation: {
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-        }
+        userLocation: position,
+        skateSpotsData: updatesSkateSpots,
       });
     }
 
@@ -131,13 +137,11 @@ class App extends Component {
   }
 
   onMapMounted = (ref) => {
-    console.log('onMapMounted');
-    console.log(ref);
     this.skateMap = ref;
-    console.log(this.skateMap);
-    let num = this.skateMap.getZoom();
-    console.log(num);
-    // panTo()
+  }
+
+  toggleNewSpotDialogue = (position) => {
+    console.log('toggleNewSpotDialogue');
   }
 
 
@@ -146,6 +150,7 @@ class App extends Component {
       currentSpotName,
       sweetTricksVisible,
       tilesData,
+      skateSpotsData,
       userLocation,
     } = this.state;
 
@@ -169,6 +174,8 @@ class App extends Component {
           handleClick={this.toggleSweetTricks}
           userLocation={userLocation}
           onMapMounted={this.onMapMounted}
+          toggleNewSpotDialogue={this.toggleNewSpotDialogue}
+          skateSpotsData={skateSpotsData}
         />
 
         <AppBottomNavigation

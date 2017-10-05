@@ -1,6 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import uniqueId from 'lodash/uniqueId';
+
 import './index.css';
+
 import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
@@ -10,6 +13,36 @@ import photo2 from './images/photo2.jpeg';
 import photo3 from './images/photo3.jpeg';
 import photo4 from './images/photo4.jpeg';
 import photo5 from './images/photo5.jpeg';
+
+const skateSpotsData = [
+  {
+    id: uniqueId(),
+    name: `Spot # ${this.id}`,
+    fixed: true,
+    position: {
+      lat: 40.70065,
+      lng: -73.9292556
+    }
+  },
+  {
+    id: uniqueId(),
+    name: `Spot # ${this.id}`,
+    fixed: true,
+    position: {
+      lat: 40.6998477,
+      lng: -73.9210112
+    }
+  },
+  {
+    id: uniqueId(),
+    name: `Spot # ${this.id}`,
+    fixed: true,
+    position: {
+      lat: 40.6954066,
+      lng: -73.9240412
+    }
+  },
+]
 
 const tilesData = [
   {
@@ -56,7 +89,10 @@ const tilesData = [
 
 ReactDOM.render(
   <MuiThemeProvider>
-    <App tilesData={tilesData}/>
+    <App
+      tilesData={tilesData}
+      skateSpotsData={skateSpotsData}
+    />
   </MuiThemeProvider>,
   document.getElementById('root'));
 registerServiceWorker();
