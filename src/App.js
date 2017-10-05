@@ -5,10 +5,19 @@ import uniqueId from 'lodash/uniqueId';
 // Import Material-UI components
 import { GridList, GridTile } from 'material-ui/GridList';
 import IconButton from 'material-ui/IconButton';
+import BottomNavigation, {
+  BottomNavigationButton
+} from 'material-ui/BottomNavigation';
 
 // Import material icons
-import ContentClear from 'material-ui/svg-icons/content/clear';
-import ActionPanTool from 'material-ui/svg-icons/action/pan-tool';
+// import ContentClear from 'material-ui/svg-icons/content/clear';
+// import ActionPanTool from 'material-ui/svg-icons/action/pan-tool';
+
+import Clear from 'material-ui-icons//Clear';
+import AddLocation from 'material-ui-icons/AddLocation';
+import MyLocation from 'material-ui-icons/MyLocation';
+import AddAPhoto from 'material-ui-icons/AddAPhoto';
+import CameraAlt from 'material-ui-icons/CameraAlt';
 
 import {
     googleMapURL,
@@ -17,6 +26,7 @@ import {
 
 // Import our components
 import SkateMap from './components/SkateMap';
+import AppBottomNavigation from './components/AppBottomNavigation';
 
 
 import './App.css';
@@ -44,6 +54,8 @@ class App extends Component {
       currentSpotName: '',
       sweetTricksVisible: false,
       tilesData: this.props.tilesData,
+      userLocation: null,
+      fetchingLocation: false,
     }
   }
 
@@ -53,20 +65,13 @@ class App extends Component {
     sweetTricksVisible: !this.state.sweetTricksVisible
   })
 
+
   addPoint = (updatedTile) => {
     let updatedTiles = [...this.state.tilesData];
 
     updatedTiles = updatedTiles.map( tile => {
-      if (tile === updatedTile) {
-        return {
-          ...tile,
-          points: tile.points + 1,
-        }
-      } else {
-        return tile
-      }
+      return tile === updatedTile ? { ...tile, points: tile.points + 1 } : tile
     })
-
 
     this.setState({
       tilesData: updatedTiles
@@ -74,22 +79,67 @@ class App extends Component {
   }
 
 
+  addSkateSpot = (location) => {
+    console.log('addSkateSpot');
+  }
+
+
+  /**
+   * Set the user location.
+   */
+  setUserLocation = () => {
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 5000,
+      maximumAge: 0
+    };
+
+    const setPosition = (pos) => {
+      console.log(pos);
+      this.setState({
+        userLocation: {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        }
+      });
+    }
+
+    const getPositionError = (error) => {
+      console.log(error);
+    }
+
+    if ("geolocation" in navigator) {
+      console.log('geodude!')
+      navigator.geolocation.getCurrentPosition(setPosition);
+    } else {
+      console.log('not geodude :()')
+    }
+  }
+
+
+  toggleCamera = () => {
+    console.log('toggleCamera');
+  }
+
+
   render() {
     const {
       currentSpotName,
       sweetTricksVisible,
-      tilesData
-     } = this.state;
+      tilesData,
+      userLocation,
+    } = this.state;
 
-     let sortedTiles = [...tilesData];
+    let sortedTiles = [...tilesData];
 
-     sortedTiles.sort(function(a, b){
-       return b.points - a.points
-     })
+    sortedTiles.sort((a, b) => {
+      return b.points - a.points
+    });
 
      let owner = sortedTiles[0];
 
     return (
+
       <div className="App">
         <SkateMap
           googleMapURL={googleMapURL}
@@ -98,27 +148,33 @@ class App extends Component {
           mapElement={<div style={{ height: `100%` }} />}
           isMarkerShown={true}
           handleClick={this.toggleSweetTricks}
+          userLocation={userLocation}
+        />
+
+        <AppBottomNavigation
+          addSkateSpot={this.addSkateSpot}
+          setUserLocation={this.setUserLocation}
+          toggleCamera={this.toggleCamera}
         />
 
         <div className={"SweetTricks " + (sweetTricksVisible ? "is-visible" : "")}>
           <div className="SweetTricks__heading">
-            <p>{currentSpotName}<br /><span>
-                owned by:</span> <span>{" " + owner.name}
-            </span>
-          </p>
-            <IconButton
-              onClick={this.toggleSweetTricks}
-              >
-              <ContentClear />
+            <p>{currentSpotName}<br />
+              <span>owned by:</span>
+              <span>{" " + owner.name}</span>
+            </p>
+            <IconButton onClick={this.toggleSweetTricks} >
+              <Clear />
             </IconButton>
           </div>
-          <GridList
+
+          {/* <GridList
             cellHeight={180}
             cols={2}
             style={styles.gridList}
             className="SweetTricks__grid"
           >
-            {sortedTiles.map((tile, index) => (
+            { sortedTiles.map((tile, index) => (
               <GridTile
                 key={uniqueId()}
                 cols={index === 0 ? 2 : 1}
@@ -129,14 +185,14 @@ class App extends Component {
                   <IconButton
                     onClick={() => this.addPoint(tile)}
                   >
-                    <ActionPanTool color="white" />
+                    <Clear color="white" />
                   </IconButton>
                 }
               >
                 <img src={tile.img} />
               </GridTile>
             ))}
-          </GridList>
+          </GridList> */}
         </div>
       </div>
     );
