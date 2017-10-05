@@ -16,8 +16,7 @@ const SkateMap = withScriptjs( withGoogleMap( props =>
     defaultCenter={{ lat: 40.6984445, lng: -73.9251668 }}
     defaultOptions={{
       styles: mapStyles,
-      fullscreenControl: false,
-      streetViewControl: false,
+      disableDefaultUI: true
      }}
     streetView={false}
   >
