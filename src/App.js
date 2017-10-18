@@ -26,6 +26,7 @@ import {
 
 // Import our components
 import SkateMap from './components/SkateMap';
+import AddSkateSpotDialog from './components/AddSkateSpotDialog';
 import AppBottomNavigation from './components/AppBottomNavigation';
 
 
@@ -57,9 +58,9 @@ class App extends Component {
       userLocation: null,
       fetchingLocation: false,
       skateSpotsData: this.props.skateSpotsData,
+      addSkateSpotDialogIsVisible: false,
     }
   }
-
 
   toggleSweetTricks = (value) => this.setState({
     currentSpotName: 'Sweet Spot #' + value,
@@ -131,7 +132,6 @@ class App extends Component {
     }
   }
 
-
   toggleCamera = () => {
     console.log('toggleCamera');
   }
@@ -141,7 +141,10 @@ class App extends Component {
   }
 
   toggleNewSpotDialogue = (position) => {
-    console.log('toggleNewSpotDialogue');
+    this.setState({
+      addSkateSpotDialogIsVisible: !this.state.addSkateSpotDialogIsVisible
+    })
+    console.log('a toggleNewSpotDialogue');
   }
 
 
@@ -152,6 +155,7 @@ class App extends Component {
       tilesData,
       skateSpotsData,
       userLocation,
+      addSkateSpotDialogIsVisible,
     } = this.state;
 
     let sortedTiles = [...tilesData];
@@ -183,6 +187,12 @@ class App extends Component {
           setUserLocation={this.setUserLocation}
           toggleCamera={this.toggleCamera}
         />
+
+        <AddSkateSpotDialog
+          title={'New Spot'}
+          isVisible={addSkateSpotDialogIsVisible}
+          toggle={this.toggleNewSpotDialogue}
+         />
 
         <div className={"SweetTricks " + (sweetTricksVisible ? "is-visible" : "")}>
           <div className="SweetTricks__heading">
