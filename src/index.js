@@ -94,5 +94,6 @@ ReactDOM.render(
       skateSpotsData={skateSpotsData}
     />
   </MuiThemeProvider>,
-  document.getElementById('root'));
+  document.getElementById('root')
+);
 registerServiceWorker();

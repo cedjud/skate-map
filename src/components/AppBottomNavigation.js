@@ -79,6 +79,7 @@ class AppBottomNavigation extends Component {
           showLabel={false}
           value="toggleCamera"
           icon={<CameraAlt />} />
+        <input type="file" accept="video/*;capture=camcorder" />
       </BottomNavigation>
     )
   }

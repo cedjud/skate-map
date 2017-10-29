@@ -62,6 +62,7 @@ class App extends Component {
     }
   }
 
+
   toggleSweetTricks = (value) => this.setState({
     currentSpotName: 'Sweet Spot #' + value,
     sweetTricksVisible: !this.state.sweetTricksVisible
@@ -147,7 +148,6 @@ class App extends Component {
     console.log('a toggleNewSpotDialogue');
   }
 
-
   render() {
     const {
       currentSpotName,
@@ -169,6 +169,7 @@ class App extends Component {
     return (
 
       <div className="App">
+        
         <SkateMap
           googleMapURL={googleMapURL}
           loadingElement={<div style={{ height: `100%` }} />}
