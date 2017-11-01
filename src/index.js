@@ -15,33 +15,33 @@ import photo4 from './images/photo4.jpeg';
 import photo5 from './images/photo5.jpeg';
 
 const skateSpotsData = [
-  {
-    id: uniqueId(),
-    name: `Spot # ${this.id}`,
-    fixed: true,
-    position: {
-      lat: 40.70065,
-      lng: -73.9292556
-    }
-  },
-  {
-    id: uniqueId(),
-    name: `Spot # ${this.id}`,
-    fixed: true,
-    position: {
-      lat: 40.6998477,
-      lng: -73.9210112
-    }
-  },
-  {
-    id: uniqueId(),
-    name: `Spot # ${this.id}`,
-    fixed: true,
-    position: {
-      lat: 40.6954066,
-      lng: -73.9240412
-    }
-  },
+  // {
+  //   id: uniqueId(),
+  //   name: `Spot # ${this.id}`,
+  //   fixed: true,
+  //   position: {
+  //     lat: 40.70065,
+  //     lng: -73.9292556
+  //   }
+  // },
+  // {
+  //   id: uniqueId(),
+  //   name: `Spot # ${this.id}`,
+  //   fixed: true,
+  //   position: {
+  //     lat: 40.6998477,
+  //     lng: -73.9210112
+  //   }
+  // },
+  // {
+  //   id: uniqueId(),
+  //   name: `Spot # ${this.id}`,
+  //   fixed: true,
+  //   position: {
+  //     lat: 40.6954066,
+  //     lng: -73.9240412
+  //   }
+  // },
 ]
 
 const tilesData = [

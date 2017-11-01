@@ -3,6 +3,7 @@
 import React, { Component } from 'react';
 import Button from 'material-ui/Button';
 import TextField from 'material-ui/TextField';
+import firebase from '../firebase.js';
 import Dialog, {
   DialogActions,
   DialogContent,
@@ -16,6 +17,7 @@ export default class AddSkateSpotDialog extends Component {
 
     this.state = {
       open: this.props.isVisible,
+      name: '',
     };
   }
 
@@ -24,8 +26,21 @@ export default class AddSkateSpotDialog extends Component {
   };
 
   handleRequestClose = () => {
+    // conso
+    const itemsRef = firebase.database().ref('spots');
+    const item = {
+      name: this.state.name,
+      position: this.props.newSkateSpotPosition
+    }
+    itemsRef.push(item);
     this.setState({ open: false });
   };
+
+  handleInput = (e) => {
+    this.setState({
+      name: e.target.value
+    })
+  }
 
   render() {
     return (
@@ -40,17 +55,16 @@ export default class AddSkateSpotDialog extends Component {
               autoFocus
               margin="dense"
               id="name"
-              label="Email Address"
-              type="email"
+              label="Spot name"
+              type="text"
               fullWidth
+              onChange={this.handleInput}
+              value={this.state.name}
             />
           </DialogContent>
           <DialogActions>
             <Button onClick={this.handleRequestClose} color="primary">
-              Cancel
-            </Button>
-            <Button onClick={this.handleRequestClose} color="primary">
-              Subscribe
+              Save
             </Button>
           </DialogActions>
         </Dialog>

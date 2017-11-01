@@ -12,13 +12,13 @@ import BottomNavigation, {
 // Import material icons
 // import ContentClear from 'material-ui/svg-icons/content/clear';
 // import ActionPanTool from 'material-ui/svg-icons/action/pan-tool';
-
 import Clear from 'material-ui-icons//Clear';
 import AddLocation from 'material-ui-icons/AddLocation';
 import MyLocation from 'material-ui-icons/MyLocation';
 import AddAPhoto from 'material-ui-icons/AddAPhoto';
 import CameraAlt from 'material-ui-icons/CameraAlt';
 
+// Import google map settings and styles
 import {
     googleMapURL,
     containerElementStyles,
@@ -63,12 +63,20 @@ class App extends Component {
   }
 
 
+  /**
+   * Toggle the tricks picture drawer
+   *
+   */
   toggleSweetTricks = (value) => this.setState({
     currentSpotName: 'Sweet Spot #' + value,
     sweetTricksVisible: !this.state.sweetTricksVisible
   })
 
 
+  /**
+   * Upvote the tile
+   *
+   */
   addPoint = (updatedTile) => {
     let updatedTiles = [...this.state.tilesData];
 
@@ -79,11 +87,6 @@ class App extends Component {
     this.setState({
       tilesData: updatedTiles
     })
-  }
-
-
-  addSkateSpot = (location) => {
-    console.log('addSkateSpot');
   }
 
 
@@ -133,21 +136,49 @@ class App extends Component {
     }
   }
 
+  /**
+   * Toggle the camera ?
+   *
+   */
   toggleCamera = () => {
     console.log('toggleCamera');
   }
 
+  /**
+   *
+   *
+   */
+  addSkateSpot = (location) => {
+    console.log('addSkateSpot');
+    console.log(this.skateMap.getCenter().toJSON());
+    this.toggleNewSpotDialogue(this.skateMap.getCenter().toJSON());
+  }
+
+  /**
+   * Set map reference
+   */
   onMapMounted = (ref) => {
     this.skateMap = ref;
   }
 
+
+  /**
+   * Toggle the New Skate Spot dialoge
+   *
+   * @param LatLng position
+   * @return void
+   */
   toggleNewSpotDialogue = (position) => {
     this.setState({
+      newSkateSpotPosition: position,
       addSkateSpotDialogIsVisible: !this.state.addSkateSpotDialogIsVisible
     })
-    console.log('a toggleNewSpotDialogue');
   }
 
+  /**
+   * Render App Component
+   *
+   */
   render() {
     const {
       currentSpotName,
@@ -156,6 +187,7 @@ class App extends Component {
       skateSpotsData,
       userLocation,
       addSkateSpotDialogIsVisible,
+      newSkateSpotPosition,
     } = this.state;
 
     let sortedTiles = [...tilesData];
@@ -164,12 +196,12 @@ class App extends Component {
       return b.points - a.points
     });
 
-     let owner = sortedTiles[0];
+    let owner = sortedTiles[0];
 
     return (
 
       <div className="App">
-        
+
         <SkateMap
           googleMapURL={googleMapURL}
           loadingElement={<div style={{ height: `100%` }} />}
@@ -192,8 +224,10 @@ class App extends Component {
         <AddSkateSpotDialog
           title={'New Spot'}
           isVisible={addSkateSpotDialogIsVisible}
+          newSkateSpotPosition={newSkateSpotPosition}
           toggle={this.toggleNewSpotDialogue}
-         />
+          // userLocation={userLocation}
+        />
 
         <div className={"SweetTricks " + (sweetTricksVisible ? "is-visible" : "")}>
           <div className="SweetTricks__heading">

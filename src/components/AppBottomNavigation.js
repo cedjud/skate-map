@@ -44,7 +44,7 @@ class AppBottomNavigation extends Component {
         toggleCamera();
         break;
 
-      case 'addSpot':
+      case 'addSkateSpot':
         addSkateSpot();
         break;
 
@@ -79,7 +79,6 @@ class AppBottomNavigation extends Component {
           showLabel={false}
           value="toggleCamera"
           icon={<CameraAlt />} />
-        <input type="file" accept="video/*;capture=camcorder" />
       </BottomNavigation>
     )
   }
