@@ -9,6 +9,7 @@ import BottomNavigation, {
   BottomNavigationButton
 } from 'material-ui/BottomNavigation';
 
+import firebase from './firebase.js';
 // Import material icons
 // import ContentClear from 'material-ui/svg-icons/content/clear';
 // import ActionPanTool from 'material-ui/svg-icons/action/pan-tool';
@@ -59,16 +60,35 @@ class App extends Component {
       fetchingLocation: false,
       skateSpotsData: this.props.skateSpotsData,
       addSkateSpotDialogIsVisible: false,
+      skateSpots: [],
     }
   }
 
+
+  componentDidMount(){
+    const skateSpotsRef = firebase.database().ref('spots');
+    skateSpotsRef.on('value', (snapshot) => {
+      let spots = snapshot.val();
+      let newState = [];
+      for (let spot in spots) {
+        newState.push({
+          id: spot,
+          name: spots[spot].name,
+          position: spots[spot].position
+        });
+      }
+      this.setState({
+        skateSpots: newState
+      });
+    });
+  }
 
   /**
    * Toggle the tricks picture drawer
    *
    */
-  toggleSweetTricks = (value) => this.setState({
-    currentSpotName: 'Sweet Spot #' + value,
+  toggleTricksDrawer = (value) => this.setState({
+    currentSpotName: 'Spot name: ' + value,
     sweetTricksVisible: !this.state.sweetTricksVisible
   })
 
@@ -144,15 +164,15 @@ class App extends Component {
     console.log('toggleCamera');
   }
 
+
   /**
-   *
+   * Add a skate spot
    *
    */
   addSkateSpot = (location) => {
-    console.log('addSkateSpot');
-    console.log(this.skateMap.getCenter().toJSON());
     this.toggleNewSpotDialogue(this.skateMap.getCenter().toJSON());
   }
+
 
   /**
    * Set map reference
@@ -175,6 +195,7 @@ class App extends Component {
     })
   }
 
+
   /**
    * Render App Component
    *
@@ -188,10 +209,10 @@ class App extends Component {
       userLocation,
       addSkateSpotDialogIsVisible,
       newSkateSpotPosition,
+      skateSpots
     } = this.state;
 
     let sortedTiles = [...tilesData];
-
     sortedTiles.sort((a, b) => {
       return b.points - a.points
     });
@@ -207,12 +228,12 @@ class App extends Component {
           loadingElement={<div style={{ height: `100%` }} />}
           containerElement={ <div style={ containerElementStyles } /> }
           mapElement={<div style={{ height: `100%` }} />}
-          isMarkerShown={true}
-          handleClick={this.toggleSweetTricks}
-          userLocation={userLocation}
           onMapMounted={this.onMapMounted}
+          isMarkerShown={true}
+          handleClick={this.toggleTricksDrawer}
+          userLocation={userLocation}
           toggleNewSpotDialogue={this.toggleNewSpotDialogue}
-          skateSpotsData={skateSpotsData}
+          skateSpotsData={skateSpots}
         />
 
         <AppBottomNavigation
@@ -232,10 +253,10 @@ class App extends Component {
         <div className={"SweetTricks " + (sweetTricksVisible ? "is-visible" : "")}>
           <div className="SweetTricks__heading">
             <p>{currentSpotName}<br />
-              <span>owned by:</span>
+              <span>owned by:&nbsp;</span>
               <span>{" " + owner.name}</span>
             </p>
-            <IconButton onClick={this.toggleSweetTricks} >
+            <IconButton onClick={this.toggleTricksDrawer} >
               <Clear />
             </IconButton>
           </div>

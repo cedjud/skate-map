@@ -21,19 +21,15 @@ export default class AddSkateSpotDialog extends Component {
     };
   }
 
-  handleClickOpen = () => {
-    this.setState({ open: true });
-  };
-
   handleRequestClose = () => {
-    // conso
     const itemsRef = firebase.database().ref('spots');
     const item = {
       name: this.state.name,
       position: this.props.newSkateSpotPosition
     }
     itemsRef.push(item);
-    this.setState({ open: false });
+
+    this.props.toggle();
   };
 
   handleInput = (e) => {
