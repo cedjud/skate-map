@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import uniqueId from 'lodash/uniqueId';
 
 // Import Material-UI components
-import { GridList, GridTile } from 'material-ui/GridList';
+import { GridList, GridListTile } from 'material-ui/GridList';
 import IconButton from 'material-ui/IconButton';
 import BottomNavigation, {
   BottomNavigationButton
@@ -81,6 +81,14 @@ class App extends Component {
         skateSpots: newState
       });
     });
+
+    // Points to the root reference
+    var storageRef = firebase.storage().ref();
+
+    // Points to 'images'
+    var imagesRef = storageRef.child('images');
+
+    console.log(imagesRef);
   }
 
   /**
@@ -162,6 +170,7 @@ class App extends Component {
    */
   toggleCamera = () => {
     console.log('toggleCamera');
+    this.videoInput.click();
   }
 
 
@@ -196,6 +205,16 @@ class App extends Component {
   }
 
 
+  handleFileInput = (files) => {
+    console.log(typeof(this.videoInput.files[0]));
+    const file = this.videoInput.files[0];
+    // Create a root reference
+    var storageRef = firebase.storage().ref();
+    var fileRef = storageRef.child('media/' + file.name);
+    fileRef.put(file).then(function(snapshot) {
+      console.log('Uploaded a blob or file!');
+    });
+  }
   /**
    * Render App Component
    *
@@ -222,6 +241,13 @@ class App extends Component {
     return (
 
       <div className="App">
+        <input
+          id="videoInput"
+          type="file"
+          accept="video/*;capture=camcorder"
+          ref={(input) => { this.videoInput = input }}
+          onChange={this.handleFileInput}
+        />
 
         <SkateMap
           googleMapURL={googleMapURL}
@@ -261,31 +287,33 @@ class App extends Component {
             </IconButton>
           </div>
 
-          {/* <GridList
+          <GridList
             cellHeight={180}
             cols={2}
             style={styles.gridList}
             className="SweetTricks__grid"
           >
-            { sortedTiles.map((tile, index) => (
-              <GridTile
-                key={uniqueId()}
-                cols={index === 0 ? 2 : 1}
-                title={tile.name}
-                style={{textAlign: "left"}}
-                subtitle={<span>points: <b>{tile.points}</b></span>}
-                actionIcon={
-                  <IconButton
-                    onClick={() => this.addPoint(tile)}
+            { sortedTiles.map((tile, index) => {
+              console.log('yo');
+                return (
+                  <GridListTile
+                    key={uniqueId()}
+                    cols={index === 0 ? 2 : 1}
+                    title={tile.name}
+                    style={{textAlign: "left"}}
+                    subtitle={<span>points: <b>{tile.points}</b></span>}
+                    actionicon={
+                    <IconButton onClick={() => this.addPoint(tile)}>
+                       <Clear color="white" />
+                    </IconButton>
+                    }
                   >
-                    <Clear color="white" />
-                  </IconButton>
-                }
-              >
-                <img src={tile.img} />
-              </GridTile>
-            ))}
-          </GridList> */}
+                    <img src={tile.img} />
+                  </GridListTile>
+                )
+              })
+            }
+          </GridList>
         </div>
       </div>
     );
