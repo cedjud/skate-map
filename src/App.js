@@ -5,19 +5,12 @@ import uniqueId from 'lodash/uniqueId';
 // Import Material-UI components
 import { GridList, GridListTile } from 'material-ui/GridList';
 import IconButton from 'material-ui/IconButton';
-import BottomNavigation, {
-  BottomNavigationButton
-} from 'material-ui/BottomNavigation';
 
 import firebase from './firebase.js';
 // Import material icons
 // import ContentClear from 'material-ui/svg-icons/content/clear';
 // import ActionPanTool from 'material-ui/svg-icons/action/pan-tool';
 import Clear from 'material-ui-icons//Clear';
-import AddLocation from 'material-ui-icons/AddLocation';
-import MyLocation from 'material-ui-icons/MyLocation';
-import AddAPhoto from 'material-ui-icons/AddAPhoto';
-import CameraAlt from 'material-ui-icons/CameraAlt';
 
 // Import google map settings and styles
 import {
@@ -39,6 +32,7 @@ const styles = {
     display: 'flex',
     flexWrap: 'wrap',
     justifyContent: 'space-around',
+    zIndex: 2,
   },
   gridList: {
     width: '100%',
@@ -61,12 +55,14 @@ class App extends Component {
       skateSpotsData: this.props.skateSpotsData,
       addSkateSpotDialogIsVisible: false,
       skateSpots: [],
+      spotMedia: [],
     }
   }
 
 
   componentDidMount(){
     const skateSpotsRef = firebase.database().ref('spots');
+
     skateSpotsRef.on('value', (snapshot) => {
       let spots = snapshot.val();
       let newState = [];
@@ -82,13 +78,29 @@ class App extends Component {
       });
     });
 
-    // Points to the root reference
-    var storageRef = firebase.storage().ref();
+    const dbMediaRef = firebase.database().ref('media');
+    const storageRef = firebase.storage().ref();
+    const imagesRef = storageRef.child('media');
 
-    // Points to 'images'
-    var imagesRef = storageRef.child('images');
+    dbMediaRef.on('value', (snapshot) => {
+      let media = snapshot.val();
+      let newState = [];
 
-    console.log(imagesRef);
+      for (let content in media) {
+        console.log(media[content].name);
+        const dlUrl = imagesRef.child(media[content].name).getDownloadURL().then((url => {
+          console.log(url);
+          newState.push({
+            img: url,
+            name: media[content].name,
+            points: 0
+          })
+        }));
+        this.setState({
+          spotMedia: newState
+        })
+      }
+    });
   }
 
   /**
@@ -164,12 +176,12 @@ class App extends Component {
     }
   }
 
+
   /**
    * Toggle the camera ?
    *
    */
   toggleCamera = () => {
-    console.log('toggleCamera');
     this.videoInput.click();
   }
 
@@ -206,7 +218,6 @@ class App extends Component {
 
 
   handleFileInput = (files) => {
-    console.log(typeof(this.videoInput.files[0]));
     const file = this.videoInput.files[0];
     // Create a root reference
     var storageRef = firebase.storage().ref();
@@ -214,6 +225,12 @@ class App extends Component {
     fileRef.put(file).then(function(snapshot) {
       console.log('Uploaded a blob or file!');
     });
+
+    const dbMediaRef = firebase.database().ref('media');
+    const media = {
+      name: file.name 
+    }
+    dbMediaRef.push(media);
   }
   /**
    * Render App Component
@@ -228,15 +245,18 @@ class App extends Component {
       userLocation,
       addSkateSpotDialogIsVisible,
       newSkateSpotPosition,
-      skateSpots
+      skateSpots,
+      spotMedia
     } = this.state;
 
-    let sortedTiles = [...tilesData];
+    // let sortedTiles = [...tilesData];
+    let sortedTiles = [...spotMedia];
     sortedTiles.sort((a, b) => {
       return b.points - a.points
     });
 
-    let owner = sortedTiles[0];
+    let owner = sortedTiles.length > 0 ? sortedTiles[0] : "Not claimed";
+    // let owner = sortedTiles[0];
 
     return (
 
@@ -266,6 +286,7 @@ class App extends Component {
           addSkateSpot={this.addSkateSpot}
           setUserLocation={this.setUserLocation}
           toggleCamera={this.toggleCamera}
+          tricksDrawerToggled={sweetTricksVisible}
         />
 
         <AddSkateSpotDialog
@@ -294,25 +315,23 @@ class App extends Component {
             className="SweetTricks__grid"
           >
             { sortedTiles.map((tile, index) => {
-              console.log('yo');
-                return (
-                  <GridListTile
-                    key={uniqueId()}
-                    cols={index === 0 ? 2 : 1}
-                    title={tile.name}
-                    style={{textAlign: "left"}}
-                    subtitle={<span>points: <b>{tile.points}</b></span>}
-                    actionicon={
-                    <IconButton onClick={() => this.addPoint(tile)}>
-                       <Clear color="white" />
-                    </IconButton>
-                    }
-                  >
-                    <img src={tile.img} />
-                  </GridListTile>
-                )
-              })
-            }
+              return (
+                <GridListTile
+                  key={uniqueId()}
+                  cols={index === 0 ? 2 : 1}
+                  title={tile.name}
+                  style={{textAlign: "left"}}
+                  subtitle={<span>points: <b>{tile.points}</b></span>}
+                  actionicon={
+                  <IconButton onClick={() => this.addPoint(tile)}>
+                      <Clear color="white" />
+                  </IconButton>
+                  }
+                >
+                  <img src={tile.img} />
+                </GridListTile>
+              )
+            }) }
           </GridList>
         </div>
       </div>

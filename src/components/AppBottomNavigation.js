@@ -57,13 +57,19 @@ class AppBottomNavigation extends Component {
 
   render(){
     const classes = this.props.classes;
+    const tricksDrawerToggled = this.props.tricksDrawerToggled;
     const { value } = this.state;
 
+
+
     return (
+      <div>
+      { !tricksDrawerToggled ? 
       <BottomNavigation
         value={0}
         onChange={this.handleChange}
         className={classes.root}
+        style={{zIndex: 2}}
       >
         <BottomNavigationButton
           showLabel={false}
@@ -75,11 +81,19 @@ class AppBottomNavigation extends Component {
           icon={<MyLocation />}
           value="setUserLocation"
         />
+      </BottomNavigation> : 
+      <BottomNavigation
+        value={0}
+        onChange={this.handleChange}
+        className={classes.root}
+        style={{zIndex: 2}}
+      >
         <BottomNavigationButton
           showLabel={false}
           value="toggleCamera"
           icon={<CameraAlt />} />
-      </BottomNavigation>
+        </BottomNavigation> }
+      </div>
     )
   }
 }
