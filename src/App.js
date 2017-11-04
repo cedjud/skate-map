@@ -31,8 +31,8 @@ const styles = {
   root: {
     display: 'flex',
     flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    zIndex: 2,
+    // justifyContent: 'space-around',
+    justifyContent: 'flex-start',
   },
   gridList: {
     width: '100%',
@@ -87,15 +87,18 @@ class App extends Component {
       let newState = [];
 
       for (let content in media) {
-        console.log(media[content].name);
-        const dlUrl = imagesRef.child(media[content].name).getDownloadURL().then((url => {
-          console.log(url);
-          newState.push({
-            img: url,
-            name: media[content].name,
-            points: 0
-          })
+        const contentRef = imagesRef.child(media[content].name);
+        const dlUrl = contentRef.getDownloadURL().then((url => {
+          const meta = contentRef.getMetadata().then(meta => {
+            newState.push({
+              img: url,
+              name: contentRef.name,
+              points: 0,
+              type: meta.contentType,
+            })
+          });
         }));
+
         this.setState({
           spotMedia: newState
         })
@@ -300,8 +303,8 @@ class App extends Component {
         <div className={"SweetTricks " + (sweetTricksVisible ? "is-visible" : "")}>
           <div className="SweetTricks__heading">
             <p>{currentSpotName}<br />
-              <span>owned by:&nbsp;</span>
-              <span>{" " + owner.name}</span>
+              {/* <span>owned by:&nbsp;</span>
+              <span>{" " + owner.name}</span> */}
             </p>
             <IconButton onClick={this.toggleTricksDrawer} >
               <Clear />
@@ -328,7 +331,10 @@ class App extends Component {
                   </IconButton>
                   }
                 >
+                { tile.type == 'video/mp4' ?
+                  <video src={tile.img} controls />:
                   <img src={tile.img} />
+                }
                 </GridListTile>
               )
             }) }

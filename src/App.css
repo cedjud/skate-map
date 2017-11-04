@@ -17,6 +17,10 @@
   transform: translateY(-100%);
 }
 
+.SweetTricks__grid {
+  align-content: flex-start;
+}
+
 .SweetTricks__heading {
   padding-left: 12px;
   display: flex;
