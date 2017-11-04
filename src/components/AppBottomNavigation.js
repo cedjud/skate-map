@@ -60,11 +60,9 @@ class AppBottomNavigation extends Component {
     const tricksDrawerToggled = this.props.tricksDrawerToggled;
     const { value } = this.state;
 
-
-
     return (
       <div>
-      { !tricksDrawerToggled ? 
+      { !tricksDrawerToggled ?
       <BottomNavigation
         value={0}
         onChange={this.handleChange}
@@ -81,7 +79,7 @@ class AppBottomNavigation extends Component {
           icon={<MyLocation />}
           value="setUserLocation"
         />
-      </BottomNavigation> : 
+      </BottomNavigation> :
       <BottomNavigation
         value={0}
         onChange={this.handleChange}

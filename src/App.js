@@ -8,8 +8,6 @@ import IconButton from 'material-ui/IconButton';
 
 import firebase from './firebase.js';
 // Import material icons
-// import ContentClear from 'material-ui/svg-icons/content/clear';
-// import ActionPanTool from 'material-ui/svg-icons/action/pan-tool';
 import Clear from 'material-ui-icons//Clear';
 
 // Import google map settings and styles
@@ -23,36 +21,42 @@ import SkateMap from './components/SkateMap';
 import AddSkateSpotDialog from './components/AddSkateSpotDialog';
 import AppBottomNavigation from './components/AppBottomNavigation';
 
-
+// Import CSS
 import './App.css';
-
 
 const styles = {
   root: {
     display: 'flex',
     flexWrap: 'wrap',
-    justifyContent: 'space-around',
+    // justifyContent: 'space-around',
     zIndex: 2,
   },
   gridList: {
+    margin: '0px',
     width: '100%',
     height: '100%',
     overflowY: 'auto',
+    alignContent: 'flex-start',
   },
 };
 
-
+/**
+ * Class App - extends the React Component Class
+ */
 class App extends Component {
 
+  /**
+   * Create the App component and set the initial state
+   *
+   * @param {object} props - the props object passes
+   */
   constructor(props){
     super(props);
     this.state = {
       currentSpotName: '',
       sweetTricksVisible: false,
-      tilesData: this.props.tilesData,
       userLocation: null,
       fetchingLocation: false,
-      skateSpotsData: this.props.skateSpotsData,
       addSkateSpotDialogIsVisible: false,
       skateSpots: [],
       spotMedia: [],
@@ -60,10 +64,16 @@ class App extends Component {
   }
 
 
+  /**
+   * Reavt lifecycle method called when the component mounts
+   */
   componentDidMount(){
     const skateSpotsRef = firebase.database().ref('spots');
+    const dbMediaRef = firebase.database().ref('media');
+    const imagesRef = firebase.storage().ref().child('media');
 
     skateSpotsRef.on('value', (snapshot) => {
+      console.log('got new spots')
       let spots = snapshot.val();
       let newState = [];
       for (let spot in spots) {
@@ -78,43 +88,85 @@ class App extends Component {
       });
     });
 
-    const dbMediaRef = firebase.database().ref('media');
-    const storageRef = firebase.storage().ref();
-    const imagesRef = storageRef.child('media');
-
     dbMediaRef.on('value', (snapshot) => {
+      console.log('got new media');
       let media = snapshot.val();
       let newState = [];
-
       for (let content in media) {
         console.log(media[content].name);
-        const dlUrl = imagesRef.child(media[content].name).getDownloadURL().then((url => {
-          console.log(url);
+        imagesRef.child(media[content].name).getDownloadURL().then( url => {
           newState.push({
             img: url,
             name: media[content].name,
             points: 0
           })
-        }));
+        }).catch(error => {
+          // A full list of error codes is available at
+          // https://firebase.google.com/docs/storage/web/handle-errors
+          switch (error.code) {
+            case 'storage/object_not_found':
+              // File doesn't exist
+              console.log(`File doesn\'t exist`);
+              break;
+
+            case 'storage/unauthorized':
+              // User doesn't have permission to access the object
+              console.log(`User doesn't have permission to access the object`);
+              break;
+
+            case 'storage/canceled':
+              // User canceled the upload
+              console.log(`User canceled the upload`);
+              break;
+
+            case 'storage/unknown':
+              console.log(`Unknown error occurred, inspect the server response`);
+              break;
+
+            default:
+              console.log(`Unknown error occurred, inspect the server response`);
+              break;
+          }
+        });
         this.setState({
           spotMedia: newState
         })
       }
     });
+
+    this.setUserLocation();
   }
+
+
+  /**
+   * Set map reference
+   */
+  onMapMounted = (ref) => {
+    this.skateMap = ref;
+  }
+
 
   /**
    * Toggle the tricks picture drawer
    *
    */
   toggleTricksDrawer = (value) => this.setState({
-    currentSpotName: 'Spot name: ' + value,
+    currentSpotName: value,
     sweetTricksVisible: !this.state.sweetTricksVisible
   })
 
 
   /**
-   * Upvote the tile
+   * Toggle the camera ?
+   *
+   */
+  toggleCamera = () => {
+    this.videoInput.click();
+  }
+
+
+  /**
+   * Upvote a tile
    *
    */
   addPoint = (updatedTile) => {
@@ -140,6 +192,7 @@ class App extends Component {
       maximumAge: 0
     };
 
+    // getCurrentPosition callback
     const setPosition = (pos) => {
 
       const position = {
@@ -147,21 +200,11 @@ class App extends Component {
         lng: pos.coords.longitude,
       };
 
-      const addSpotMarker = {
-        id: uniqueId(),
-        name: '',
-        position: position
-      }
-
-      const updatesSkateSpots = [...this.state.skateSpotsData];
-      updatesSkateSpots.push(addSpotMarker);
-
-      this.skateMap.panTo(position);
-
       this.setState({
         userLocation: position,
-        skateSpotsData: updatesSkateSpots,
       });
+
+      this.skateMap && this.skateMap.panTo(position);
     }
 
     const getPositionError = (error) => {
@@ -178,60 +221,65 @@ class App extends Component {
 
 
   /**
-   * Toggle the camera ?
-   *
-   */
-  toggleCamera = () => {
-    this.videoInput.click();
-  }
-
-
-  /**
-   * Add a skate spot
-   *
-   */
-  addSkateSpot = (location) => {
-    this.toggleNewSpotDialogue(this.skateMap.getCenter().toJSON());
-  }
-
-
-  /**
-   * Set map reference
-   */
-  onMapMounted = (ref) => {
-    this.skateMap = ref;
-  }
-
-
-  /**
    * Toggle the New Skate Spot dialoge
    *
-   * @param LatLng position
    * @return void
    */
-  toggleNewSpotDialogue = (position) => {
+  addSkateSpot = () => {
     this.setState({
-      newSkateSpotPosition: position,
+      newSkateSpotPosition: this.skateMap.getCenter().toJSON(),
       addSkateSpotDialogIsVisible: !this.state.addSkateSpotDialogIsVisible
     })
   }
 
 
+  /**
+   *
+   */
   handleFileInput = (files) => {
     const file = this.videoInput.files[0];
     // Create a root reference
-    var storageRef = firebase.storage().ref();
-    var fileRef = storageRef.child('media/' + file.name);
-    fileRef.put(file).then(function(snapshot) {
-      console.log('Uploaded a blob or file!');
-    });
+    const storageRef = firebase.storage().ref();
+    const fileRef = storageRef.child('media/' + file.name);
 
-    const dbMediaRef = firebase.database().ref('media');
-    const media = {
-      name: file.name 
-    }
-    dbMediaRef.push(media);
+    // fileRef.put(file).then(snapshot => {
+    //   console.log('Uploaded a blob or file!');
+    // });
+
+    var uploadTask = fileRef.put(file);
+
+    // Register three observers:
+    // 1. 'state_changed' observer, called any time the state changes
+    // 2. Error observer, called on failure
+    // 3. Completion observer, called on successful completion
+    uploadTask.on('state_changed', function(snapshot){
+      // Observe state change events such as progress, pause, and resume
+      // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+      var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      console.log('Upload is ' + progress + '% done');
+      switch (snapshot.state) {
+        case firebase.storage.TaskState.PAUSED: // or 'paused'
+          console.log('Upload is paused');
+          break;
+        case firebase.storage.TaskState.RUNNING: // or 'running'
+          console.log('Upload is running');
+          break;
+      }
+    }, function(error) {
+      // Handle unsuccessful uploads
+    }, function() {
+      // Handle successful uploads on complete
+      // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+      // var downloadURL = uploadTask.snapshot.downloadURL;
+      const dbMediaRef = firebase.database().ref('media');
+      const media = {
+        name: file.name
+      }
+      dbMediaRef.push(media);
+    });
   }
+
+
   /**
    * Render App Component
    *
@@ -269,18 +317,23 @@ class App extends Component {
           onChange={this.handleFileInput}
         />
 
-        <SkateMap
-          googleMapURL={googleMapURL}
-          loadingElement={<div style={{ height: `100%` }} />}
-          containerElement={ <div style={ containerElementStyles } /> }
-          mapElement={<div style={{ height: `100%` }} />}
-          onMapMounted={this.onMapMounted}
-          isMarkerShown={true}
-          handleClick={this.toggleTricksDrawer}
-          userLocation={userLocation}
-          toggleNewSpotDialogue={this.toggleNewSpotDialogue}
-          skateSpotsData={skateSpots}
-        />
+
+        { userLocation ?
+          <SkateMap
+            googleMapURL={googleMapURL}
+            loadingElement={<div style={{ height: `100%` }} />}
+            containerElement={ <div style={ containerElementStyles } /> }
+            mapElement={<div style={{ height: `100%` }} />}
+            onMapMounted={this.onMapMounted}
+            isMarkerShown={true}
+            handleClick={this.toggleTricksDrawer}
+            userLocation={userLocation}
+            toggleNewSpotDialogue={this.toggleNewSpotDialogue}
+            skateSpotsData={skateSpots}
+          /> :
+          <p>Getting location...</p>
+        }
+
 
         <AppBottomNavigation
           addSkateSpot={this.addSkateSpot}
@@ -289,21 +342,22 @@ class App extends Component {
           tricksDrawerToggled={sweetTricksVisible}
         />
 
+
         <AddSkateSpotDialog
           title={'New Spot'}
           isVisible={addSkateSpotDialogIsVisible}
           newSkateSpotPosition={newSkateSpotPosition}
-          toggle={this.toggleNewSpotDialogue}
-          // userLocation={userLocation}
+          toggle={this.addSkateSpot}
         />
+
 
         <div className={"SweetTricks " + (sweetTricksVisible ? "is-visible" : "")}>
           <div className="SweetTricks__heading">
             <p>{currentSpotName}<br />
               <span>owned by:&nbsp;</span>
-              <span>{" " + owner.name}</span>
+              {/* <span>{" " + owner.name}</span> */}
             </p>
-            <IconButton onClick={this.toggleTricksDrawer} >
+            <IconButton onClick={() => this.toggleTricksDrawer("")} >
               <Clear />
             </IconButton>
           </div>
