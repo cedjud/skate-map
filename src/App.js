@@ -331,7 +331,7 @@ class App extends Component {
             toggleNewSpotDialogue={this.toggleNewSpotDialogue}
             skateSpotsData={skateSpots}
           /> :
-          <p>Getting location...</p>
+          <p>Getting your location location...</p>
         }
 
 
