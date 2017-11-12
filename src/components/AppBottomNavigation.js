@@ -5,7 +5,6 @@ import { withStyles } from 'material-ui/styles';
 // Import icons
 import AddLocation from 'material-ui-icons/AddLocation';
 import MyLocation from 'material-ui-icons/MyLocation';
-import AddAPhoto from 'material-ui-icons/AddAPhoto';
 import CameraAlt from 'material-ui-icons/CameraAlt';
 
 // Import Material-UI components
@@ -58,7 +57,6 @@ class AppBottomNavigation extends Component {
   render(){
     const classes = this.props.classes;
     const tricksDrawerToggled = this.props.tricksDrawerToggled;
-    const { value } = this.state;
 
     return (
       <div>

@@ -25,7 +25,8 @@ export default class AddSkateSpotDialog extends Component {
     const itemsRef = firebase.database().ref('spots');
     const item = {
       name: this.state.name,
-      position: this.props.newSkateSpotPosition
+      position: this.props.newSkateSpotPosition,
+      media:  [],
     }
     itemsRef.push(item);
 

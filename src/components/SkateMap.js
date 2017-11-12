@@ -32,7 +32,7 @@ const SkateMap = withScriptjs( withGoogleMap( props =>
               icon={skateSpot.new ? AddLocation : Whatshot}
               onClick={
                 !skateSpot.new ?
-                () => props.handleClick(skateSpot.name) :
+                () => props.handleClick(skateSpot) :
                 props.toggleNewSpotDialogue
               }
               position={skateSpot.position}

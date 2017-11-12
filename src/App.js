@@ -53,7 +53,10 @@ class App extends Component {
   constructor(props){
     super(props);
     this.state = {
-      currentSpotName: '',
+      currentSpot: {
+        name: '',
+        id: ''
+      },
       sweetTricksVisible: false,
       userLocation: null,
       fetchingLocation: false,
@@ -68,9 +71,11 @@ class App extends Component {
    * Reavt lifecycle method called when the component mounts
    */
   componentDidMount(){
+    const { spotMedia } = this.state;
+
     const skateSpotsRef = firebase.database().ref('spots');
-    const dbMediaRef = firebase.database().ref('media');
-    const imagesRef = firebase.storage().ref().child('media');
+    const dbMediaRef = firebase.database().ref('spotMedia');
+    const imagesRef = firebase.storage().ref().child('spotMedia');
 
     skateSpotsRef.on('value', (snapshot) => {
       console.log('got new spots')
@@ -88,51 +93,34 @@ class App extends Component {
       });
     });
 
-    dbMediaRef.on('value', (snapshot) => {
-      console.log('got new media');
-      let media = snapshot.val();
-      let newState = [];
-      for (let content in media) {
-        console.log(media[content].name);
-        imagesRef.child(media[content].name).getDownloadURL().then( url => {
-          newState.push({
-            img: url,
-            name: media[content].name,
-            points: 0
-          })
-        }).catch(error => {
-          // A full list of error codes is available at
-          // https://firebase.google.com/docs/storage/web/handle-errors
-          switch (error.code) {
-            case 'storage/object_not_found':
-              // File doesn't exist
-              console.log(`File doesn\'t exist`);
-              break;
-
-            case 'storage/unauthorized':
-              // User doesn't have permission to access the object
-              console.log(`User doesn't have permission to access the object`);
-              break;
-
-            case 'storage/canceled':
-              // User canceled the upload
-              console.log(`User canceled the upload`);
-              break;
-
-            case 'storage/unknown':
-              console.log(`Unknown error occurred, inspect the server response`);
-              break;
-
-            default:
-              console.log(`Unknown error occurred, inspect the server response`);
-              break;
-          }
-        });
-        this.setState({
-          spotMedia: newState
-        })
-      }
-    });
+    // dbMediaRef.on('value', (snapshot) => {
+    //   console.log('got new media');
+    //   let media = snapshot.val();
+    //   let newState = [...spotMedia];
+    //   console.log(media);
+    //   console.log(newState);
+    //
+    //   for (let content in media) {
+    //     console.log(media[content].name);
+    //
+    //     imagesRef.child(media[content].name).getDownloadURL().then( url => {
+    //       imagesRef.child(media[content].name).getMetadata().then( meta => {
+    //         newState.push({
+    //           img: url,
+    //           name: media[content].name,
+    //           points: 0,
+    //           type: meta.contentType,
+    //         })
+    //       });
+    //     }).catch(error => {
+    //       console.log(error.code);
+    //     });
+    //
+    //     this.setState({
+    //       spotMedia: newState
+    //     })
+    //   }
+    // });
 
     this.setUserLocation();
   }
@@ -150,10 +138,20 @@ class App extends Component {
    * Toggle the tricks picture drawer
    *
    */
-  toggleTricksDrawer = (value) => this.setState({
-    currentSpotName: value,
-    sweetTricksVisible: !this.state.sweetTricksVisible
-  })
+  toggleTricksDrawer = (value) => {
+    const imagesRef = firebase.storage().ref().child('spotMedia');
+    const spotsRef = firebase.database().ref('spots');
+    // const currentSpotRed = spotsRef.child(value.id);
+    // console.log(currentSpotRed);
+
+    this.setState({
+      currentSpot: {
+        name: value.name,
+        id: value.id
+      },
+      sweetTricksVisible: !this.state.sweetTricksVisible
+    })
+  }
 
 
   /**
@@ -186,11 +184,11 @@ class App extends Component {
    * Set the user location.
    */
   setUserLocation = () => {
-    const options = {
-      enableHighAccuracy: true,
-      timeout: 5000,
-      maximumAge: 0
-    };
+    // const options = {
+    //   enableHighAccuracy: true,
+    //   timeout: 5000,
+    //   maximumAge: 0
+    // };
 
     // getCurrentPosition callback
     const setPosition = (pos) => {
@@ -213,7 +211,7 @@ class App extends Component {
 
     if ("geolocation" in navigator) {
       console.log('geolocating...')
-      navigator.geolocation.getCurrentPosition(setPosition);
+      navigator.geolocation.getCurrentPosition(setPosition, getPositionError);
     } else {
       console.log('not geodude :()')
     }
@@ -237,10 +235,11 @@ class App extends Component {
    *
    */
   handleFileInput = (files) => {
+    const { currentSpot } = this.state;
     const file = this.videoInput.files[0];
     // Create a root reference
     const storageRef = firebase.storage().ref();
-    const fileRef = storageRef.child('media/' + file.name);
+    const fileRef = storageRef.child('spots/' + currentSpot.id + "/" + file.name);
 
     // fileRef.put(file).then(snapshot => {
     //   console.log('Uploaded a blob or file!');
@@ -264,6 +263,8 @@ class App extends Component {
         case firebase.storage.TaskState.RUNNING: // or 'running'
           console.log('Upload is running');
           break;
+        default:
+          break;
       }
     }, function(error) {
       // Handle unsuccessful uploads
@@ -271,11 +272,18 @@ class App extends Component {
       // Handle successful uploads on complete
       // For instance, get the download URL: https://firebasestorage.googleapis.com/...
       // var downloadURL = uploadTask.snapshot.downloadURL;
-      const dbMediaRef = firebase.database().ref('media');
+      const dbMediaRef = firebase.database().ref('spots/' + currentSpot.id ).child('media').push().key;
       const media = {
-        name: file.name
+        name: file.name,
+        spotId: currentSpot.id,
+        spotName: currentSpot.name
       }
-      dbMediaRef.push(media);
+      let updates = {};
+      updates['spots/' + currentSpot.id + '/media/' + dbMediaRef] = media;
+      // dbMediaRef.set({
+      //   media: media
+      // });
+      firebase.database().ref().update(updates);
     });
   }
 
@@ -286,25 +294,22 @@ class App extends Component {
    */
   render() {
     const {
-      currentSpotName,
+      currentSpot,
       sweetTricksVisible,
-      tilesData,
-      skateSpotsData,
       userLocation,
       addSkateSpotDialogIsVisible,
       newSkateSpotPosition,
       skateSpots,
-      spotMedia
+      // spotMedia
     } = this.state;
 
     // let sortedTiles = [...tilesData];
-    let sortedTiles = [...spotMedia];
-    sortedTiles.sort((a, b) => {
-      return b.points - a.points
-    });
+    // let sortedTiles = [...spotMedia];
+    // sortedTiles.sort((a, b) => {
+    //   return b.points - a.points
+    // });
 
-    let owner = sortedTiles.length > 0 ? sortedTiles[0] : "Not claimed";
-    // let owner = sortedTiles[0];
+    // let owner = sortedTiles.length > 0 ? sortedTiles[0] : "Not claimed";
 
     return (
 
@@ -353,7 +358,7 @@ class App extends Component {
 
         <div className={"SweetTricks " + (sweetTricksVisible ? "is-visible" : "")}>
           <div className="SweetTricks__heading">
-            <p>{currentSpotName}<br />
+            <p>{currentSpot.name}<br />
               <span>owned by:&nbsp;</span>
               {/* <span>{" " + owner.name}</span> */}
             </p>
@@ -368,7 +373,7 @@ class App extends Component {
             style={styles.gridList}
             className="SweetTricks__grid"
           >
-            { sortedTiles.map((tile, index) => {
+            {/* sortedTiles.map((tile, index) => {
               return (
                 <GridListTile
                   key={uniqueId()}
@@ -382,10 +387,14 @@ class App extends Component {
                   </IconButton>
                   }
                 >
-                  <img src={tile.img} />
+                  {
+                    tile.type === 'video/mp4' ?
+                    <video src={tile.img} /> :
+                    <img src={tile.img} alt="" />
+                  }
                 </GridListTile>
               )
-            }) }
+            }) */}
           </GridList>
         </div>
       </div>
