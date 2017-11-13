@@ -6,9 +6,11 @@ import uniqueId from 'lodash/uniqueId';
 import { GridList, GridListTile } from 'material-ui/GridList';
 import IconButton from 'material-ui/IconButton';
 
-import firebase from './firebase.js';
 // Import material icons
 import Clear from 'material-ui-icons//Clear';
+
+// Import firebase settings
+import firebase, { auth, provider } from './firebase.js';
 
 // Import google map settings and styles
 import {
@@ -19,7 +21,8 @@ import {
 // Import our components
 import SkateMap from './components/SkateMap';
 import AddSkateSpotDialog from './components/AddSkateSpotDialog';
-import AppBottomNavigation from './components/AppBottomNavigation';
+// import ActionBar from './components/ActionBar';
+import ActionBar from './components/ActionBar';
 
 // Import CSS
 import './App.css';
@@ -53,12 +56,13 @@ class App extends Component {
   constructor(props){
     super(props);
     this.state = {
+      user: null,
+      userLocation: null,
       currentSpot: {
         name: '',
         id: ''
       },
       sweetTricksVisible: false,
-      userLocation: null,
       fetchingLocation: false,
       addSkateSpotDialogIsVisible: false,
       skateSpots: [],
@@ -122,7 +126,7 @@ class App extends Component {
     //   }
     // });
 
-    this.setUserLocation();
+    // this.setUserLocation();
   }
 
 
@@ -287,6 +291,16 @@ class App extends Component {
     });
   }
 
+  login = () => {
+    auth.signInWithPopup(provider)
+    .then((result) => {
+      const user = result.user;
+      this.setState({
+        user
+      });
+    });
+  }
+
 
   /**
    * Render App Component
@@ -323,28 +337,25 @@ class App extends Component {
         />
 
 
-        { userLocation ?
-          <SkateMap
-            googleMapURL={googleMapURL}
-            loadingElement={<div style={{ height: `100%` }} />}
-            containerElement={ <div style={ containerElementStyles } /> }
-            mapElement={<div style={{ height: `100%` }} />}
-            onMapMounted={this.onMapMounted}
-            isMarkerShown={true}
-            handleClick={this.toggleTricksDrawer}
-            userLocation={userLocation}
-            toggleNewSpotDialogue={this.toggleNewSpotDialogue}
-            skateSpotsData={skateSpots}
-          /> :
-          <p>Getting your location location...</p>
-        }
+        <SkateMap
+          googleMapURL={googleMapURL}
+          loadingElement={<div style={{ height: `100%` }} />}
+          containerElement={ <div style={ containerElementStyles } /> }
+          mapElement={<div style={{ height: `100%` }} />}
+          onMapMounted={this.onMapMounted}
+          isMarkerShown={true}
+          handleClick={this.toggleTricksDrawer}
+          userLocation={userLocation}
+          toggleNewSpotDialogue={this.toggleNewSpotDialogue}
+          skateSpotsData={skateSpots}
+        /> 
 
-
-        <AppBottomNavigation
+        <ActionBar
           addSkateSpot={this.addSkateSpot}
           setUserLocation={this.setUserLocation}
           toggleCamera={this.toggleCamera}
           tricksDrawerToggled={sweetTricksVisible}
+          login={this.login}
         />
 
 
@@ -356,11 +367,11 @@ class App extends Component {
         />
 
 
+        {/*
         <div className={"SweetTricks " + (sweetTricksVisible ? "is-visible" : "")}>
           <div className="SweetTricks__heading">
             <p>{currentSpot.name}<br />
               <span>owned by:&nbsp;</span>
-              {/* <span>{" " + owner.name}</span> */}
             </p>
             <IconButton onClick={() => this.toggleTricksDrawer("")} >
               <Clear />
@@ -373,7 +384,7 @@ class App extends Component {
             style={styles.gridList}
             className="SweetTricks__grid"
           >
-            {/* sortedTiles.map((tile, index) => {
+            { sortedTiles.map((tile, index) => {
               return (
                 <GridListTile
                   key={uniqueId()}
@@ -394,9 +405,9 @@ class App extends Component {
                   }
                 </GridListTile>
               )
-            }) */}
+            }) }
           </GridList>
-        </div>
+        </div>*/}
       </div>
     );
   }

@@ -31,6 +31,7 @@ class AppBottomNavigation extends Component {
     const {
       setUserLocation,
       toggleCamera,
+      login,
       addSkateSpot,
     } = this.props;
 
@@ -45,6 +46,10 @@ class AppBottomNavigation extends Component {
 
       case 'addSkateSpot':
         addSkateSpot();
+        break;
+
+      case 'login':
+        login();
         break;
 
       default:
@@ -76,6 +81,12 @@ class AppBottomNavigation extends Component {
           showLabel={false}
           icon={<MyLocation />}
           value="setUserLocation"
+        />
+        <BottomNavigationButton
+          // showLabel={false}
+          label="sign in"
+          icon={<MyLocation />}
+          value="login"
         />
       </BottomNavigation> :
       <BottomNavigation
