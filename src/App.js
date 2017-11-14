@@ -72,7 +72,49 @@ class App extends Component {
 
 
   /**
-   * Reavt lifecycle method called when the component mounts
+   * Create a ref to the map
+   */
+  onMapMounted = (ref) => {
+    this.skateMap = ref;
+  }
+
+
+  /**
+   * Create a ref to the new spot marker
+   */
+  onNewSpotMounted = (ref) => {
+    this.newSpotMarker = ref;
+  }
+
+
+  /**
+   * Login user
+   */
+  login = () => {
+    auth.signInWithPopup(provider)
+    .then((result) => {
+      const user = result.user;
+      this.setState({
+        user
+      });
+    });
+  }
+
+
+  /**
+   * Logout user
+   */
+  logout = () => {
+    auth.signOut()
+    .then(() => {
+      this.setState({
+        user: null
+      });
+    });
+  }
+
+  /**
+   * React lifecycle method called when the component mounts
    */
   componentDidMount(){
     const { spotMedia } = this.state;
@@ -82,7 +124,7 @@ class App extends Component {
     const imagesRef = firebase.storage().ref().child('spotMedia');
 
     skateSpotsRef.on('value', (snapshot) => {
-      console.log('got new spots')
+      console.log('got spots')
       let spots = snapshot.val();
       let newState = [];
       for (let spot in spots) {
@@ -95,6 +137,14 @@ class App extends Component {
       this.setState({
         skateSpots: newState
       });
+    });
+
+
+    // Listen for user
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        this.setState({ user });
+      }
     });
 
     // dbMediaRef.on('value', (snapshot) => {
@@ -130,12 +180,6 @@ class App extends Component {
   }
 
 
-  /**
-   * Set map reference
-   */
-  onMapMounted = (ref) => {
-    this.skateMap = ref;
-  }
 
 
   /**
@@ -196,7 +240,6 @@ class App extends Component {
 
     // getCurrentPosition callback
     const setPosition = (pos) => {
-
       const position = {
         lat: pos.coords.latitude,
         lng: pos.coords.longitude,
@@ -228,10 +271,34 @@ class App extends Component {
    * @return void
    */
   addSkateSpot = () => {
+    console.log('addSkateSpot');
     this.setState({
-      newSkateSpotPosition: this.skateMap.getCenter().toJSON(),
-      addSkateSpotDialogIsVisible: !this.state.addSkateSpotDialogIsVisible
+      createSpot: true,
+      newSpotPosition: this.skateMap.getCenter().toJSON(),
     })
+  }
+
+
+  /**
+   *
+   */
+  saveNewSpot = () => {
+    console.log('saveNewSpot');
+    const itemsRef = firebase.database().ref('spots');
+    const item = {
+      name: this.newSpotMarker.getPosition().toString(),
+      position: this.newSpotMarker.getPosition().toJSON(),
+      media:  [],
+      createdBy: this.state.user.uid,
+      creatorDisplayName: this.state.user.displayName,
+    }
+    itemsRef.push(item);
+
+    this.setState({
+      createSpot: false,
+      newSpotPosition: null
+    })
+
   }
 
 
@@ -291,16 +358,6 @@ class App extends Component {
     });
   }
 
-  login = () => {
-    auth.signInWithPopup(provider)
-    .then((result) => {
-      const user = result.user;
-      this.setState({
-        user
-      });
-    });
-  }
-
 
   /**
    * Render App Component
@@ -314,6 +371,8 @@ class App extends Component {
       addSkateSpotDialogIsVisible,
       newSkateSpotPosition,
       skateSpots,
+      createSpot,
+      newSpotPosition,
       // spotMedia
     } = this.state;
 
@@ -336,19 +395,20 @@ class App extends Component {
           onChange={this.handleFileInput}
         />
 
-
         <SkateMap
           googleMapURL={googleMapURL}
-          loadingElement={<div style={{ height: `100%` }} />}
+          loadingElement={<div style={{ height: `100%` }} >loading map... </div>}
           containerElement={ <div style={ containerElementStyles } /> }
           mapElement={<div style={{ height: `100%` }} />}
           onMapMounted={this.onMapMounted}
+          onNewSpotMounted={this.onNewSpotMounted}
           isMarkerShown={true}
           handleClick={this.toggleTricksDrawer}
-          userLocation={userLocation}
           toggleNewSpotDialogue={this.toggleNewSpotDialogue}
           skateSpotsData={skateSpots}
-        /> 
+          createSpot={createSpot}
+          newSpotPosition={newSpotPosition}
+        />
 
         <ActionBar
           addSkateSpot={this.addSkateSpot}
@@ -356,8 +416,11 @@ class App extends Component {
           toggleCamera={this.toggleCamera}
           tricksDrawerToggled={sweetTricksVisible}
           login={this.login}
+          logout={this.logout}
+          userIsSignedIn={this.state.user}
+          createSpot={createSpot}
+          saveNewSpot={this.saveNewSpot}
         />
-
 
         <AddSkateSpotDialog
           title={'New Spot'}

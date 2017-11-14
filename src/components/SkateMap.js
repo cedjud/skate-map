@@ -19,10 +19,19 @@ const SkateMap = withScriptjs( withGoogleMap( props =>
     defaultCenter={{lat: 30.0643914, lng: -18.0244607}}
     defaultOptions={{
       styles: mapStyles,
-      disableDefaultUI: true
+      // disableDefaultUI: true
      }}
     streetView={false}
+    onClick={() => console.log('cliiiiick')}
   >
+    { props.createSpot ?
+      <Marker
+        ref={props.onNewSpotMounted}
+        position={props.newSpotPosition}
+        draggable={true}
+      /> :
+      null
+    }
     { props.isMarkerShown &&
       <div>
         { props.skateSpotsData.map( (skateSpot, index) => {
