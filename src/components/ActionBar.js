@@ -14,32 +14,40 @@ import '../styles/ActionBar.css';
 
 class ActionBar extends Component {
   render(){
+    const {
+      userIsSignedIn,
+      createSpot,
+    } = this.props;
 
     return (
       <div className="ActionBar">
 
-        { !this.props.userIsSignedIn ?
+        { userIsSignedIn ?
           <Button onClick={this.props.login}>Sign In</Button> :
           <Button onClick={this.props.logout}>Sign Out</Button>
         }
 
-        { !this.props.createNewSpot &&
+        { !createSpot &&
           <Button onClick={this.props.setUserLocation}>My Location</Button>
         }
 
-        { this.props.userIsSignedIn &&
-          !this.props.createSpot &&
+        { userIsSignedIn && !createSpot &&
           <Button onClick={this.props.addSkateSpot}>Add Spot</Button>
         }
 
-        { this.props.userIsSignedIn &&
-          this.props.createSpot &&
+        { userIsSignedIn &&
+          createSpot &&
           <Button onClick={this.props.saveNewSpot}>Confirm Location</Button>
         }
 
-        { this.props.userIsSignedIn &&
-          !this.props.createNewSpot &&
-          this.props.spotSelected &&
+        { userIsSignedIn &&
+          createSpot &&
+          <Button onClick={this.props.addSpotInfo}>Add Spot Info</Button>
+        }
+
+        { userIsSignedIn &&
+          false &&
+          !createSpot &&
           <Button onClick={this.props.toggleCamera}>Record</Button>
         }
       </div>

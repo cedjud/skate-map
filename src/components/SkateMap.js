@@ -22,11 +22,11 @@ const SkateMap = withScriptjs( withGoogleMap( props =>
       // disableDefaultUI: true
      }}
     streetView={false}
-    onClick={() => console.log('cliiiiick')}
   >
     { props.createSpot ?
       <Marker
         ref={props.onNewSpotMounted}
+        icon={AddLocation}
         position={props.newSpotPosition}
         draggable={true}
       /> :
@@ -38,12 +38,8 @@ const SkateMap = withScriptjs( withGoogleMap( props =>
           return (
             <Marker
               key={uniqueId()}
-              icon={skateSpot.new ? AddLocation : Whatshot}
-              onClick={
-                !skateSpot.new ?
-                () => props.handleClick(skateSpot) :
-                props.toggleNewSpotDialogue
-              }
+              icon={Whatshot}
+              onClick={props.viewSpot}
               position={skateSpot.position}
             />
           )

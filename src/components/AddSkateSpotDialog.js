@@ -22,15 +22,16 @@ export default class AddSkateSpotDialog extends Component {
   }
 
   handleRequestClose = () => {
-    const itemsRef = firebase.database().ref('spots');
-    const item = {
+    // const itemsRef = firebase.database().ref('spots');
+    // const item = {
+    //   name: this.state.name,
+    //   position: this.props.newSkateSpotPosition,
+    //   media:  [],
+    // }
+    // itemsRef.push(item);
+    this.props.hide({
       name: this.state.name,
-      position: this.props.newSkateSpotPosition,
-      media:  [],
-    }
-    itemsRef.push(item);
-
-    this.props.toggle();
+    });
   };
 
   handleInput = (e) => {
@@ -42,7 +43,7 @@ export default class AddSkateSpotDialog extends Component {
   render() {
     return (
       <div>
-        <Dialog open={this.props.isVisible} onRequestClose={this.props.toggle}>
+        <Dialog open={this.props.isVisible} onRequestClose={this.handleRequestClose}>
           <DialogTitle>{this.props.title}</DialogTitle>
           <DialogContent>
             <DialogContentText>

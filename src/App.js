@@ -67,6 +67,7 @@ class App extends Component {
       addSkateSpotDialogIsVisible: false,
       skateSpots: [],
       spotMedia: [],
+      spotInfo: null,
     }
   }
 
@@ -279,6 +280,26 @@ class App extends Component {
   }
 
 
+  addSpotInfo = (waddup) => {
+    if (!this.state.createSpot){
+      return;
+    }
+
+    this.setState({
+      addSkateSpotDialogIsVisible: true,
+    })
+  }
+
+  hideSpotInfoDialog = (spotInfo) => {
+    // console.log(info.name);
+    this.setState({
+      addSkateSpotDialogIsVisible: false,
+      spotInfo,
+    })
+  }
+
+
+
   /**
    *
    */
@@ -288,9 +309,13 @@ class App extends Component {
     const item = {
       name: this.newSpotMarker.getPosition().toString(),
       position: this.newSpotMarker.getPosition().toJSON(),
-      media:  [],
+      media: [],
       createdBy: this.state.user.uid,
       creatorDisplayName: this.state.user.displayName,
+      createOn: new Date().toISOString(),
+      name: this.state.spotInfo.name || '',
+      description: this.state.spotInfo.description || '',
+      tags: this.state.spotInfo.tags || '',
     }
     itemsRef.push(item);
 
@@ -420,13 +445,15 @@ class App extends Component {
           userIsSignedIn={this.state.user}
           createSpot={createSpot}
           saveNewSpot={this.saveNewSpot}
+          addSpotInfo={this.addSpotInfo}
         />
 
         <AddSkateSpotDialog
           title={'New Spot'}
           isVisible={addSkateSpotDialogIsVisible}
           newSkateSpotPosition={newSkateSpotPosition}
-          toggle={this.addSkateSpot}
+          toggle={this.addSpotInfo}
+          hide={this.hideSpotInfoDialog}
         />
 
 
