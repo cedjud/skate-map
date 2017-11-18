@@ -22,8 +22,8 @@ import {
 // Import our components
 import SkateMap from './components/SkateMap';
 import AddSkateSpotDialog from './components/AddSkateSpotDialog';
-// import ActionBar from './components/ActionBar';
 import ActionBar from './components/ActionBar';
+import AddSkateSpotForm from './components/AddSkateSpotForm';
 
 // Import CSS
 import './App.css';
@@ -70,7 +70,7 @@ class App extends Component {
       spotMedia: [],
       spotInfo: null,
       zoom: 4,
-      drawerOpen: true,
+      drawerOpen: false,
       drawerContent: null,
       drawerAnchor: 'left'
     }
@@ -295,8 +295,9 @@ class App extends Component {
       return;
     }
 
-    this.openDrawer('bottom');
+    this.openDrawer('bottom', 'newSpot');
   }
+
 
   hideSpotInfoDialog = (spotInfo) => {
     // console.log(info.name);
@@ -320,7 +321,6 @@ class App extends Component {
     this.setState({
       drawerOpen: false,
       drawerContent: null,
-      drawerAnchor: "left",
     })
   }
 
@@ -422,7 +422,8 @@ class App extends Component {
       skateSpots,
       createSpot,
       newSpotPosition,
-      // spotMedia
+      userInfo,
+      drawerContent
     } = this.state;
 
     // let sortedTiles = [...tilesData];
@@ -487,13 +488,16 @@ class App extends Component {
           open={this.state.drawerOpen}
           onRequestClose={this.closeDrawer}
         >
-          <button onClick={this.closeDrawer}>close</button>
+          <IconButton onClick={this.closeDrawer}>
+            <Clear />
+          </IconButton>
           {
-            this.createSpot &&
-            <p>Add spot info</p>
+            createSpot &&
+            drawerContent === "newSpot" &&
+            <AddSkateSpotForm />
           }
           {
-            this.userInfo &&
+            userInfo &&
             <p>User info</p>
           }
         </Drawer>
