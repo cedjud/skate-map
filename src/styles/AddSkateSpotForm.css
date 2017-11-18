@@ -7,9 +7,19 @@
   margin-bottom: 18px;
 }
 
+.AddSkateSpotForm__loader-container {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .AddSkateSpotForm__image-container {
   position: relative;
   width: 100%;
+  overflow: hidden;
 }
 
 .AddSkateSpotForm__image-container:before {
@@ -24,5 +34,18 @@
   right: 0;
   bottom: 0;
   left: 0;
-  background-color: hsla(360, 100%, 50%, 0.5);
+  background-color: hsla(360, 0%, 75%, 1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.AddSkateSpotForm__image-button {
+  background: hsla(0, 0%, 100%, 1);
+  border-radius: 50%;
+}
+
+.AddSkateSpotForm__buttons {
+  margin-top: 18px;
+  text-align: right;
 }

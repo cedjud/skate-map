@@ -5548,6 +5548,10 @@ react-jss@^7.2.0:
     prop-types "^15.5.8"
     theming "^1.1.0"
 
+react-loading@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/react-loading/-/react-loading-1.0.2.tgz#227ae6b5fef2275f26bcad501f52a1ba312d6804"
+
 react-popper@^0.7.3:
   version "0.7.3"
   resolved "https://registry.yarnpkg.com/react-popper/-/react-popper-0.7.3.tgz#fa2809a80fbe7ec516e9bac01d81bc47a8b5cd3b"

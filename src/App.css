@@ -69,3 +69,8 @@
   z-index: 999;
 
 }
+
+.DrawerControls {
+  display: flex;
+  justify-content: flex-end;
+}

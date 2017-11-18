@@ -22,8 +22,12 @@ class ActionBar extends Component {
     return (
       <div className="ActionBar">
 
-        { !userIsSignedIn ?
-          <Button onClick={this.props.login}>Sign In</Button> :
+        { !userIsSignedIn &&
+          <Button onClick={this.props.login}>Sign In</Button>
+        }
+
+        { userIsSignedIn &&
+          !createSpot &&
           <Button onClick={this.props.logout}>Sign Out</Button>
         }
 
@@ -36,10 +40,12 @@ class ActionBar extends Component {
           <Button onClick={this.props.addSkateSpot}>Add Spot</Button>
         }
 
+        {/*
         { userIsSignedIn &&
           createSpot &&
           <Button onClick={this.props.saveNewSpot}>Confirm Location</Button>
         }
+        */}
 
         { userIsSignedIn &&
           createSpot &&

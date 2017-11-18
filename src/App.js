@@ -289,6 +289,12 @@ class App extends Component {
     })
   }
 
+  cancelAddSkatSpot = () => {
+    this.setState({
+      createSpot: false,
+    });
+    this.closeDrawer();
+  }
 
   addSpotInfo = (waddup) => {
     if (!this.state.createSpot){
@@ -328,17 +334,16 @@ class App extends Component {
   /**
    *
    */
-  saveNewSpot = () => {
+  saveNewSpot = (spotData) => {
     console.log('saveNewSpot');
     const itemsRef = firebase.database().ref('spots');
     const item = {
       position: this.newSpotMarker.getPosition().toJSON(),
-      media: [],
       createdBy: this.state.user.uid,
       creatorDisplayName: this.state.user.displayName,
       createOn: new Date().toISOString(),
-      // name: this.state.spotInfo.name || '',
-      // description: this.state.spotInfo.description || '',
+      name: spotData.name,
+      description: spotData.description,
       // tags: this.state.spotInfo.tags || '',
     }
     itemsRef.push(item);
@@ -488,13 +493,18 @@ class App extends Component {
           open={this.state.drawerOpen}
           onRequestClose={this.closeDrawer}
         >
-          <IconButton onClick={this.closeDrawer}>
-            <Clear />
-          </IconButton>
+          <div className="DrawerControls">
+            <IconButton onClick={this.closeDrawer} >
+              <Clear />
+            </IconButton>
+          </div>
           {
             createSpot &&
             drawerContent === "newSpot" &&
-            <AddSkateSpotForm />
+            <AddSkateSpotForm
+              cancel={this.cancelAddSkatSpot}
+              saveSpot={this.saveNewSpot}
+            />
           }
           {
             userInfo &&
