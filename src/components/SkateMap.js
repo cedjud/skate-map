@@ -15,7 +15,8 @@ import {
 const SkateMap = withScriptjs( withGoogleMap( props =>
   <GoogleMap
     ref={props.onMapMounted}
-    defaultZoom={3}
+    defaultZoom={props.zoom}
+    zoom={props.zoom}
     defaultCenter={{lat: 30.0643914, lng: -18.0244607}}
     defaultOptions={{
       styles: mapStyles,

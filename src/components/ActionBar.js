@@ -22,7 +22,7 @@ class ActionBar extends Component {
     return (
       <div className="ActionBar">
 
-        { userIsSignedIn ?
+        { !userIsSignedIn ?
           <Button onClick={this.props.login}>Sign In</Button> :
           <Button onClick={this.props.logout}>Sign Out</Button>
         }
@@ -31,7 +31,8 @@ class ActionBar extends Component {
           <Button onClick={this.props.setUserLocation}>My Location</Button>
         }
 
-        { userIsSignedIn && !createSpot &&
+        { userIsSignedIn
+          && !createSpot &&
           <Button onClick={this.props.addSkateSpot}>Add Spot</Button>
         }
 

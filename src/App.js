@@ -5,6 +5,7 @@ import uniqueId from 'lodash/uniqueId';
 // Import Material-UI components
 import { GridList, GridListTile } from 'material-ui/GridList';
 import IconButton from 'material-ui/IconButton';
+import Drawer from 'material-ui/Drawer';
 
 // Import material icons
 import Clear from 'material-ui-icons//Clear';
@@ -68,6 +69,10 @@ class App extends Component {
       skateSpots: [],
       spotMedia: [],
       spotInfo: null,
+      zoom: 4,
+      drawerOpen: true,
+      drawerContent: null,
+      drawerAnchor: 'left'
     }
   }
 
@@ -248,9 +253,13 @@ class App extends Component {
 
       this.setState({
         userLocation: position,
+        zoom: 13,
       });
 
-      this.skateMap && this.skateMap.panTo(position);
+      if (this.skateMap){
+        this.skateMap.panTo(position);
+        // console.log(this.skateMap.setZoom(34));
+      }
     }
 
     const getPositionError = (error) => {
@@ -276,6 +285,7 @@ class App extends Component {
     this.setState({
       createSpot: true,
       newSpotPosition: this.skateMap.getCenter().toJSON(),
+      zoom: 14,
     })
   }
 
@@ -285,9 +295,7 @@ class App extends Component {
       return;
     }
 
-    this.setState({
-      addSkateSpotDialogIsVisible: true,
-    })
+    this.openDrawer('bottom');
   }
 
   hideSpotInfoDialog = (spotInfo) => {
@@ -299,6 +307,23 @@ class App extends Component {
   }
 
 
+  openDrawer = (anchor, content) => {
+    this.setState({
+      drawerOpen: true,
+      drawerContent: content,
+      drawerAnchor: anchor,
+    })
+  }
+
+
+  closeDrawer = () => {
+    this.setState({
+      drawerOpen: false,
+      drawerContent: null,
+      drawerAnchor: "left",
+    })
+  }
+
 
   /**
    *
@@ -307,15 +332,14 @@ class App extends Component {
     console.log('saveNewSpot');
     const itemsRef = firebase.database().ref('spots');
     const item = {
-      name: this.newSpotMarker.getPosition().toString(),
       position: this.newSpotMarker.getPosition().toJSON(),
       media: [],
       createdBy: this.state.user.uid,
       creatorDisplayName: this.state.user.displayName,
       createOn: new Date().toISOString(),
-      name: this.state.spotInfo.name || '',
-      description: this.state.spotInfo.description || '',
-      tags: this.state.spotInfo.tags || '',
+      // name: this.state.spotInfo.name || '',
+      // description: this.state.spotInfo.description || '',
+      // tags: this.state.spotInfo.tags || '',
     }
     itemsRef.push(item);
 
@@ -433,6 +457,7 @@ class App extends Component {
           skateSpotsData={skateSpots}
           createSpot={createSpot}
           newSpotPosition={newSpotPosition}
+          zoom={this.state.zoom}
         />
 
         <ActionBar
@@ -446,6 +471,7 @@ class App extends Component {
           createSpot={createSpot}
           saveNewSpot={this.saveNewSpot}
           addSpotInfo={this.addSpotInfo}
+          openDrawer={this.openDrawer}
         />
 
         <AddSkateSpotDialog
@@ -455,6 +481,22 @@ class App extends Component {
           toggle={this.addSpotInfo}
           hide={this.hideSpotInfoDialog}
         />
+
+        <Drawer
+          anchor={this.state.drawerAnchor}
+          open={this.state.drawerOpen}
+          onRequestClose={this.closeDrawer}
+        >
+          <button onClick={this.closeDrawer}>close</button>
+          {
+            this.createSpot &&
+            <p>Add spot info</p>
+          }
+          {
+            this.userInfo &&
+            <p>User info</p>
+          }
+        </Drawer>
 
 
         {/*
