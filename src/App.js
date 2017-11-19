@@ -149,7 +149,11 @@ class App extends Component {
       this.setState({
         skateSpots: newState,
         currentSpot: newState.find( (spot) => {
-          return spot.id === this.state.currentSpot.id
+          if (this.state.currentSpot) {
+            return spot.id === this.state.currentSpot.id;
+          } else {
+            return false;
+          }
         }),
       });
     });
@@ -292,7 +296,7 @@ class App extends Component {
     this.setState({
       createSpot: true,
       newSpotPosition: this.skateMap.getCenter().toJSON(),
-      zoom: 14,
+      zoom: 18,
     })
   }
 
@@ -422,12 +426,14 @@ class App extends Component {
       // For instance, get the download URL: https://firebasestorage.googleapis.com/...
       // var downloadURL = uploadTask.snapshot.downloadURL;
       const dbMediaRef = firebase.database().ref('spots/' + currentSpot.id ).child('media').push().key;
+
       const media = {
         name: file.name,
         spotId: currentSpot.id,
         spotName: currentSpot.name,
         imagePath: 'spots/' + currentSpot.id + "/" + file.name,
       }
+
       let updates = {};
       updates['spots/' + currentSpot.id + '/media/' + dbMediaRef] = media;
       // dbMediaRef.set({
