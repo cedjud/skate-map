@@ -9,8 +9,9 @@ import TextField from 'material-ui/TextField';
 import Icon from 'material-ui/Icon';
 import IconButton from 'material-ui/IconButton';
 import AddAPhoto from 'material-ui-icons/AddAPhoto';
+import ArrowUpward from 'material-ui-icons/ArrowUpward';
+import ArrowDownward from 'material-ui-icons/ArrowDownward';
 import Button from 'material-ui/Button';
-
 
 import '../styles/CurrentSpot.css';
 
@@ -38,31 +39,59 @@ class CurrentSpot extends Component {
       console.log(error)
     });
 
+    // const media = this.props.spot.media;
+    // const spotMediaWithPaths = []
+    // const spotMediaPromises = []
+    //
+    // for (let content in media) {
+    //   let getMediaUrlPromise = storageRef.child(media[content].imagePath).getDownloadURL().then( url => {
+    //     console.log(url);
+    //     return { ...media[content], url: url };
+    //   }).catch(error => {
+    //     console.log(error.code);
+    //   });
+    //   spotMediaPromises.push(getMediaUrlPromise);
+    // }
+    //
+    // Promise.all(spotMediaPromises).then(medias => {
+    //   this.setState({
+    //     mediaFetched: true,
+    //     spotMedia: medias,
+    //   })
+    // })
+    this.getMedia();
+  }
+
+  componentWillReceiveProps(){
+    // this.getMedia();
+    console.log(this.props);
+    this.getMedia();
+  }
+
+
+
+  getMedia = () => {
+    const storageRef = firebase.storage().ref();
     const media = this.props.spot.media;
     const spotMediaWithPaths = []
-    let getMediaUrls = new Promise((resolve, reject) => {
-      for (let content in media) {
-        storageRef.child(media[content].imagePath).getDownloadURL().then( url => {
-          spotMediaWithPaths.push({
-            ...media[content],
-            url: url,
-          })
-        }).catch(error => {
-          console.log(error.code);
-        });
-      }
-      resolve(spotMediaWithPaths);
-    })
+    const spotMediaPromises = []
 
-    getMediaUrls.then((success) => {
-      console.log("done?")
-      console.log(success.length)
+    for (let content in media) {
+      let getMediaUrlPromise = storageRef.child(media[content].imagePath).getDownloadURL().then( url => {
+        console.log(url);
+        return { ...media[content], url: url };
+      }).catch(error => {
+        console.log(error.code);
+      });
+      spotMediaPromises.push(getMediaUrlPromise);
+    }
+
+    Promise.all(spotMediaPromises).then(medias => {
       this.setState({
-        spotMedia: success,
+        mediaFetched: true,
+        spotMedia: medias,
       })
-    });
-    // let someshit = new Promise( (resolve, reject) => setTimeout(() => {resolve('yay')}, 350));
-    // someshit.then(succ => console.log(succ));
+    })
   }
 
   handleChange = name => event => {
@@ -148,44 +177,56 @@ class CurrentSpot extends Component {
        media,
      } = this.props.spot
 
-
     return (
       <div className="CurrentSpot">
-        <div className="CurrentSpot__image-container">
-          <div className="CurrentSpot__image">
-          { !coverUrl ?
-              <ReactLoading
-                type="bubbles"
-                color="#444"
-                delay={0} />
-              :
-              <img src={coverUrl} />
-            }
-          </div>
-          <div className="CurrentSpot__info">
-            <h1>{name}</h1>
-            <p>{description}</p>
-          </div>
-        </div>
+        {
+          !mediaFetched ?
+          <div className="CurrentSpot__loading-container">
             <ReactLoading
-              type="bubbles"
+              type="spinningBubbles"
               color="#444"
               delay={0}
             />
-        { /*
-          !spotMedia ?
-            <ReactLoading
-              type="bubbles"
-              color="#444"
-              delay={0}
-            />:
-            null
-            // <div className="CurrentSpot__media-container">
-            //   <div className="CurrentSpot__media">
-            //      { spotMedia.map( media => <img key={uniqueId()} src={media.url} />) }
-            //    </div>
-            // </div>
-        */ }
+          </div> :
+          <div>
+            <div className="CurrentSpot__image-container">
+              <div className="CurrentSpot__image">
+                <img src={coverUrl} />
+              </div>
+              <div className="CurrentSpot__info">
+                <h1>{name}</h1>
+                <p>{description}</p>
+              </div>
+            </div>
+            <div className="CurrentSpot__media-wrapper">
+             { spotMedia.map( (media) => {
+                return (
+                  <div key={uniqueId()} className="CurrentSpot__media-container">
+                    <div className="CurrentSpot__media">
+                      <img src={media.url} />
+                    </div>
+                    <div className="CurrentSpot__actions">
+                      <IconButton
+                        color="contrast"
+                        style={{opacity: "0.6"}}
+                      >
+                        <ArrowDownward />
+                      </IconButton>
+                      <IconButton
+                        color="contrast"
+                        style={{opacity: "0.6"}}
+                      >
+                        <ArrowUpward />
+                      </IconButton>
+
+                    </div>
+                  </div>
+                )
+              })
+            }
+          </div>
+        </div>
+      }
       </div>
     )
   }

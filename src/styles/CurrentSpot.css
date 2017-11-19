@@ -1,6 +1,6 @@
 .CurrentSpot {
   min-height: 80vh;
-  padding: 0px 18px 18px;
+  padding: 0px 6px 6px;
 }
 
 .CurrentSpot > div {
@@ -22,16 +22,31 @@
   overflow: hidden;
 }
 
+.CurrentSpot__loading-container {
+  height: calc(80vh - 32px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .CurrentSpot__image-container:before {
   content: "";
   display: block;
 	padding-top: 56.25%;
 }
 
+.CurrentSpot__media-wrapper {
+  margin-top: 6px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
 .CurrentSpot__media-container {
   position: relative;
-  width: 100%;
+  width: calc(50% - 3px);
   overflow: hidden;
+  margin-bottom: 6px;
 }
 
 .CurrentSpot__media-container:before {
@@ -122,4 +137,16 @@
 .CurrentSpot__buttons {
   margin-top: 18px;
   text-align: right;
+}
+
+.CurrentSpot__actions {
+  position: absolute;
+  bottom: 0;
+  z-index: 1;
+  height: 36px;
+  width: 100%;
+  background: hsla(360, 100%, 1%, 0.6);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
