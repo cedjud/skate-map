@@ -167,19 +167,25 @@ class CurrentSpot extends Component {
             <p>{description}</p>
           </div>
         </div>
-        {
+            <ReactLoading
+              type="bubbles"
+              color="#444"
+              delay={0}
+            />
+        { /*
           !spotMedia ?
             <ReactLoading
               type="bubbles"
               color="#444"
               delay={0}
             />:
-            <div className="CurrentSpot__media-container">
-              <div className="CurrentSpot__media">
-                 { spotMedia.map( media => <img key={uniqueId()} src={media.url} />) }
-               </div>
-            </div>
-        }
+            null
+            // <div className="CurrentSpot__media-container">
+            //   <div className="CurrentSpot__media">
+            //      { spotMedia.map( media => <img key={uniqueId()} src={media.url} />) }
+            //    </div>
+            // </div>
+        */ }
       </div>
     )
   }
