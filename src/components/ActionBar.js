@@ -17,26 +17,31 @@ class ActionBar extends Component {
     const {
       userIsSignedIn,
       createSpot,
+      viewingSpot,
     } = this.props;
 
     return (
-      <div className="ActionBar">
+      <div className="ActionBar" style={this.props.style}>
 
         { !userIsSignedIn &&
+          !viewingSpot &&
           <Button onClick={this.props.login}>Sign In</Button>
         }
 
         { userIsSignedIn &&
           !createSpot &&
+          !viewingSpot &&
           <Button onClick={this.props.logout}>Sign Out</Button>
         }
 
         { !createSpot &&
+          !viewingSpot &&
           <Button onClick={this.props.setUserLocation}>My Location</Button>
         }
 
-        { userIsSignedIn
-          && !createSpot &&
+        { userIsSignedIn &&
+          !createSpot &&
+          !viewingSpot &&
           <Button onClick={this.props.addSkateSpot}>Add Spot</Button>
         }
 
@@ -49,12 +54,13 @@ class ActionBar extends Component {
 
         { userIsSignedIn &&
           createSpot &&
+          !viewingSpot &&
           <Button onClick={this.props.addSpotInfo}>Add Spot Info</Button>
         }
 
         { userIsSignedIn &&
-          false &&
           !createSpot &&
+          viewingSpot &&
           <Button onClick={this.props.toggleCamera}>Record</Button>
         }
       </div>

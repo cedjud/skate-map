@@ -97,11 +97,9 @@ class AddSkateSpotForm extends Component {
     return (
       <div className="AddSkateSpotForm">
         { uploading ?
-          <div className="AddSkateSpotForm">
             <div className="AddSkateSpotForm__loader-container">
               <ReactLoading type="bubbles" color="#444" delay={0} />
-            </div>
-          </div> :
+            </div> :
           <div>
             <div className="AddSkateSpotForm__image-container">
               <div className="AddSkateSpotForm__image">

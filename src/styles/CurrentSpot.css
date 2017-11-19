@@ -28,6 +28,18 @@
 	padding-top: 56.25%;
 }
 
+.CurrentSpot__media-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.CurrentSpot__media-container:before {
+  content: "";
+  display: block;
+	padding-top: 56.25%;
+}
+
 .CurrentSpot__image-container:after {
   content: "";
   position: absolute;
@@ -57,8 +69,26 @@
   z-index: 1;
 }
 
+.CurrentSpot__media {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: hsla(360, 0%, 75%, 1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+}
+
 .CurrentSpot__image > img {
-  min-width: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.CurrentSpot__media > img {
+  width: 100%;
   object-fit: cover;
 }
 

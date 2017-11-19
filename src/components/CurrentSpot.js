@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import uniqueId from 'lodash/uniqueId';
 
 import firebase from '../firebase.js';
 
@@ -23,6 +24,7 @@ class CurrentSpot extends Component {
       uploading: false,
       mediaFetched: false,
       coverUrl: null,
+      spotMedia: false
     }
   }
 
@@ -35,6 +37,32 @@ class CurrentSpot extends Component {
     }).catch((error) => {
       console.log(error)
     });
+
+    const media = this.props.spot.media;
+    const spotMediaWithPaths = []
+    let getMediaUrls = new Promise((resolve, reject) => {
+      for (let content in media) {
+        storageRef.child(media[content].imagePath).getDownloadURL().then( url => {
+          spotMediaWithPaths.push({
+            ...media[content],
+            url: url,
+          })
+        }).catch(error => {
+          console.log(error.code);
+        });
+      }
+      resolve(spotMediaWithPaths);
+    })
+
+    getMediaUrls.then((success) => {
+      console.log("done?")
+      console.log(success.length)
+      this.setState({
+        spotMedia: success,
+      })
+    });
+    // let someshit = new Promise( (resolve, reject) => setTimeout(() => {resolve('yay')}, 350));
+    // someshit.then(succ => console.log(succ));
   }
 
   handleChange = name => event => {
@@ -42,6 +70,10 @@ class CurrentSpot extends Component {
       [name]: event.target.value,
     });
   };
+
+  componentWillReceiveProps(nextProps){
+    console.log(nextProps);
+  }
 
   addImage = () => {
     this.spotImage.click();
@@ -106,13 +138,16 @@ class CurrentSpot extends Component {
       imagePreview,
       uploading,
       mediaFetched,
-      coverUrl
+      coverUrl,
+      spotMedia
      } = this.state;
 
      const {
        name,
        description,
+       media,
      } = this.props.spot
+
 
     return (
       <div className="CurrentSpot">
@@ -132,6 +167,19 @@ class CurrentSpot extends Component {
             <p>{description}</p>
           </div>
         </div>
+        {
+          !spotMedia ?
+            <ReactLoading
+              type="bubbles"
+              color="#444"
+              delay={0}
+            />:
+            <div className="CurrentSpot__media-container">
+              <div className="CurrentSpot__media">
+                 { spotMedia.map( media => <img key={uniqueId()} src={media.url} />) }
+               </div>
+            </div>
+        }
       </div>
     )
   }

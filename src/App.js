@@ -143,10 +143,14 @@ class App extends Component {
           position: spots[spot].position,
           coverImageRef: spots[spot].coverImageRef,
           description: spots[spot].description,
+          media: spots[spot].media
         });
       }
       this.setState({
-        skateSpots: newState
+        skateSpots: newState,
+        currentSpot: newState.find( (spot) => {
+          return spot.id === this.state.currentSpot.id
+        }),
       });
     });
 
@@ -189,8 +193,6 @@ class App extends Component {
 
     // this.setUserLocation();
   }
-
-
 
 
   /**
@@ -423,7 +425,8 @@ class App extends Component {
       const media = {
         name: file.name,
         spotId: currentSpot.id,
-        spotName: currentSpot.name
+        spotName: currentSpot.name,
+        imagePath: 'spots/' + currentSpot.id + "/" + file.name,
       }
       let updates = {};
       updates['spots/' + currentSpot.id + '/media/' + dbMediaRef] = media;
@@ -514,6 +517,8 @@ class App extends Component {
           saveNewSpot={this.saveNewSpot}
           addSpotInfo={this.addSpotInfo}
           openDrawer={this.openDrawer}
+          viewingSpot={drawerContent === "viewSpot"}
+          style={drawerContent === "viewSpot" ? {zIndex: "1501"} : {}}
         />
 
         <AddSkateSpotDialog

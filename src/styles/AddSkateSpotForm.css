@@ -1,15 +1,15 @@
 .AddSkateSpotForm {
   min-height: 80vh;
-  padding: 0px 18px 18px;
+  padding: 0px 12px 12px;
 }
 
-.AddSkateSpotForm > div {
+.AddSkateSpotForm > div > div {
   margin-bottom: 18px;
 }
 
 .AddSkateSpotForm__loader-container {
   width: 100%;
-  height: 100%;
+  min-height: 80vh;
 
   display: flex;
   justify-content: center;
@@ -38,6 +38,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.AddSkateSpotForm__image > img {
+  width: 100%;
+  object-fit: cover;
 }
 
 .AddSkateSpotForm__image-button {
