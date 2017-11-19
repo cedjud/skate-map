@@ -38,32 +38,10 @@ class CurrentSpot extends Component {
     }).catch((error) => {
       console.log(error)
     });
-
-    // const media = this.props.spot.media;
-    // const spotMediaWithPaths = []
-    // const spotMediaPromises = []
-    //
-    // for (let content in media) {
-    //   let getMediaUrlPromise = storageRef.child(media[content].imagePath).getDownloadURL().then( url => {
-    //     console.log(url);
-    //     return { ...media[content], url: url };
-    //   }).catch(error => {
-    //     console.log(error.code);
-    //   });
-    //   spotMediaPromises.push(getMediaUrlPromise);
-    // }
-    //
-    // Promise.all(spotMediaPromises).then(medias => {
-    //   this.setState({
-    //     mediaFetched: true,
-    //     spotMedia: medias,
-    //   })
-    // })
     this.getMedia();
   }
 
   componentWillReceiveProps(){
-    // this.getMedia();
     console.log(this.props);
     this.getMedia();
   }
