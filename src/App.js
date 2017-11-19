@@ -390,6 +390,7 @@ class App extends Component {
   handleFileInput = (files) => {
     const { currentSpot } = this.state;
     const file = this.videoInput.files[0];
+
     // Create a root reference
     const storageRef = firebase.storage().ref();
     const fileRef = storageRef.child('spots/' + currentSpot.id + "/" + file.name);
@@ -524,7 +525,7 @@ class App extends Component {
           addSpotInfo={this.addSpotInfo}
           openDrawer={this.openDrawer}
           viewingSpot={drawerContent === "viewSpot"}
-          style={drawerContent === "viewSpot" ? {zIndex: "1501"} : {}}
+          style={drawerContent === "viewSpot" && this.state.user ? {zIndex: "1501"} : {}}
         />
 
         <AddSkateSpotDialog

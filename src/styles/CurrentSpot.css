@@ -52,7 +52,7 @@
 .CurrentSpot__media-container:before {
   content: "";
   display: block;
-	padding-top: 56.25%;
+	padding-top: 100%;
 }
 
 .CurrentSpot__image-container:after {
@@ -105,6 +105,11 @@
 .CurrentSpot__media > img {
   width: 100%;
   object-fit: cover;
+  min-height: 100%;
+}
+
+.CurrentSpot__media-container:last-child {
+    margin-bottom: 36px;
 }
 
 .CurrentSpot__info {
@@ -149,4 +154,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.CurrentSpot__video {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  max-width: 100%;
 }

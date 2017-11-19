@@ -57,7 +57,9 @@ class CurrentSpot extends Component {
     for (let content in media) {
       let getMediaUrlPromise = storageRef.child(media[content].imagePath).getDownloadURL().then( url => {
         console.log(url);
-        return { ...media[content], url: url };
+        return storageRef.child(media[content].imagePath).getMetadata().then( meta => {
+            return { ...media[content], url: url, type: meta.contentType, };
+        })
       }).catch(error => {
         console.log(error.code);
       });
@@ -178,11 +180,20 @@ class CurrentSpot extends Component {
             </div>
             <div className="CurrentSpot__media-wrapper">
              { spotMedia.map( (media) => {
+               media.type ? console.log(media.type.indexOf('video')) : console.log('media');
                 return (
                   <div key={uniqueId()} className="CurrentSpot__media-container">
                     <div className="CurrentSpot__media">
-                      <img src={media.url} />
+                      { media.type && media.type.indexOf('video') != -1 ?
+                        <video
+                          className="CurrentSpot__video"
+                          src={media.url}
+                          controls
+                        /> :
+                        <img src={media.url} />
+                      }
                     </div>
+                    {/*
                     <div className="CurrentSpot__actions">
                       <IconButton
                         color="contrast"
@@ -196,8 +207,7 @@ class CurrentSpot extends Component {
                       >
                         <ArrowUpward />
                       </IconButton>
-
-                    </div>
+                    </div> */}
                   </div>
                 )
               })
