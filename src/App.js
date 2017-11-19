@@ -2,6 +2,8 @@
 import React, { Component } from 'react';
 import uniqueId from 'lodash/uniqueId';
 
+import ReactLoading from 'react-loading';
+
 // Import Material-UI components
 import { GridList, GridListTile } from 'material-ui/GridList';
 import IconButton from 'material-ui/IconButton';
@@ -24,6 +26,7 @@ import SkateMap from './components/SkateMap';
 import AddSkateSpotDialog from './components/AddSkateSpotDialog';
 import ActionBar from './components/ActionBar';
 import AddSkateSpotForm from './components/AddSkateSpotForm';
+import CurrentSpot from './components/CurrentSpot';
 
 // Import CSS
 import './App.css';
@@ -69,7 +72,7 @@ class App extends Component {
       skateSpots: [],
       spotMedia: [],
       spotInfo: null,
-      zoom: 4,
+      zoom: 11,
       drawerOpen: false,
       drawerContent: null,
       drawerAnchor: 'left'
@@ -137,7 +140,9 @@ class App extends Component {
         newState.push({
           id: spot,
           name: spots[spot].name,
-          position: spots[spot].position
+          position: spots[spot].position,
+          coverImageRef: spots[spot].coverImageRef,
+          description: spots[spot].description,
         });
       }
       this.setState({
@@ -305,6 +310,19 @@ class App extends Component {
   }
 
 
+  viewSpot = (spot) => {
+    if (this.state.createSpot){
+      return;
+    }
+
+    this.setState({
+      currentSpot: spot
+    })
+
+    this.openDrawer('bottom', 'viewSpot');
+  }
+
+
   hideSpotInfoDialog = (spotInfo) => {
     // console.log(info.name);
     this.setState({
@@ -344,13 +362,17 @@ class App extends Component {
       createOn: new Date().toISOString(),
       name: spotData.name,
       description: spotData.description,
+      mediaPathName: spotData.mediaPathName,
+      coverImageRef: spotData.coverImageRef,
       // tags: this.state.spotInfo.tags || '',
     }
     itemsRef.push(item);
 
     this.setState({
       createSpot: false,
-      newSpotPosition: null
+      newSpotPosition: null,
+      drawerOpen: false,
+      drawerContent: null,
     })
 
   }
@@ -448,11 +470,24 @@ class App extends Component {
           accept="video/*;capture=camcorder"
           ref={(input) => { this.videoInput = input }}
           onChange={this.handleFileInput}
+          hidden
         />
 
         <SkateMap
           googleMapURL={googleMapURL}
-          loadingElement={<div style={{ height: `100%` }} >loading map... </div>}
+          loadingElement={<div style={{
+            height: `100%`,
+            width: `100%`,
+            display: 'flex',
+            justifyContent: 'center',
+            alignContent: 'center',
+            alignItems: 'center'
+           }} >
+           <ReactLoading
+             type="bubbles"
+             color="#444"
+             delay={0} />
+           </div>}
           containerElement={ <div style={ containerElementStyles } /> }
           mapElement={<div style={{ height: `100%` }} />}
           onMapMounted={this.onMapMounted}
@@ -461,6 +496,7 @@ class App extends Component {
           handleClick={this.toggleTricksDrawer}
           toggleNewSpotDialogue={this.toggleNewSpotDialogue}
           skateSpotsData={skateSpots}
+          viewSpot={this.viewSpot}
           createSpot={createSpot}
           newSpotPosition={newSpotPosition}
           zoom={this.state.zoom}
@@ -507,11 +543,16 @@ class App extends Component {
             />
           }
           {
+            drawerContent === "viewSpot" &&
+            <CurrentSpot
+              spot={this.state.currentSpot}
+            />
+          }
+          {
             userInfo &&
             <p>User info</p>
           }
         </Drawer>
-
 
         {/*
         <div className={"SweetTricks " + (sweetTricksVisible ? "is-visible" : "")}>

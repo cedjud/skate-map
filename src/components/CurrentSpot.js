@@ -11,17 +11,30 @@ import AddAPhoto from 'material-ui-icons/AddAPhoto';
 import Button from 'material-ui/Button';
 
 
-import '../styles/AddSkateSpotForm.css';
+import '../styles/CurrentSpot.css';
 
-class AddSkateSpotForm extends Component {
+class CurrentSpot extends Component {
   constructor(props){
     super(props);
     this.state = {
       name: '',
       description: '',
       imagePreview: null,
-      uploading: false
+      uploading: false,
+      mediaFetched: false,
+      coverUrl: null,
     }
+  }
+
+  componentDidMount(){
+    var storageRef = firebase.storage().ref();
+    storageRef.child(this.props.spot.coverImageRef).getDownloadURL().then((url) => {
+      this.setState({
+        coverUrl: url,
+      })
+    }).catch((error) => {
+      console.log(error)
+    });
   }
 
   handleChange = name => event => {
@@ -91,69 +104,37 @@ class AddSkateSpotForm extends Component {
   render() {
     const {
       imagePreview,
-      uploading
+      uploading,
+      mediaFetched,
+      coverUrl
      } = this.state;
 
+     const {
+       name,
+       description,
+     } = this.props.spot
+
     return (
-      <div className="AddSkateSpotForm">
-        { uploading ?
-          <div className="AddSkateSpotForm">
-            <div className="AddSkateSpotForm__loader-container">
-              <ReactLoading type="bubbles" color="#444" delay={0} />
-            </div>
-          </div> :
-          <div>
-            <div className="AddSkateSpotForm__image-container">
-              <div className="AddSkateSpotForm__image">
-                { !imagePreview ?
-                  <div className="AddSkateSpotForm__image-button">
-                    <IconButton onClick={this.addImage}>
-                      <AddAPhoto />
-                    </IconButton>
-                  </div>
-                  :
-                  <img src={imagePreview} />
-                }
-              </div>
-            </div>
-            <TextField
-              label="Name"
-              fullWidth
-              value={this.state.name}
-              onChange={this.handleChange('name')}
-            />
-            <TextField
-              label="Description"
-              multiline
-              fullWidth
-              value={this.state.description}
-              onChange={this.handleChange('description')}
-            />
-            <input
-              id="spotImageInput"
-              type="file"
-              accept="video/*;capture=camcorder"
-              ref={(input) => { this.spotImage = input }}
-              onChange={this.handleFileInput}
-              hidden
-            />
-            <div className="AddSkateSpotForm__buttons">
-              <Button
-                onClick={this.props.cancel}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={this.save}
-              >
-                Save
-              </Button>
-            </div>
+      <div className="CurrentSpot">
+        <div className="CurrentSpot__image-container">
+          <div className="CurrentSpot__image">
+          { !coverUrl ?
+              <ReactLoading
+                type="bubbles"
+                color="#444"
+                delay={0} />
+              :
+              <img src={coverUrl} />
+            }
           </div>
-        }
+          <div className="CurrentSpot__info">
+            <h1>{name}</h1>
+            <p>{description}</p>
+          </div>
+        </div>
       </div>
     )
   }
 }
 
-export default AddSkateSpotForm;
+export default CurrentSpot;

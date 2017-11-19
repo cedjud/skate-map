@@ -17,7 +17,7 @@ const SkateMap = withScriptjs( withGoogleMap( props =>
     ref={props.onMapMounted}
     defaultZoom={props.zoom}
     zoom={props.zoom}
-    defaultCenter={{lat: 30.0643914, lng: -18.0244607}}
+    defaultCenter={{lat: 40.6451594, lng: -74.0850816}}
     defaultOptions={{
       styles: mapStyles,
       // disableDefaultUI: true
@@ -40,7 +40,7 @@ const SkateMap = withScriptjs( withGoogleMap( props =>
             <Marker
               key={uniqueId()}
               icon={Whatshot}
-              onClick={props.viewSpot}
+              onClick={() => props.viewSpot(skateSpot)}
               position={skateSpot.position}
             />
           )
