@@ -2,15 +2,18 @@
 import React, { Component } from 'react';
 import uniqueId from 'lodash/uniqueId';
 
+import ReactLoading from 'react-loading';
+
 // Import Material-UI components
 import { GridList, GridListTile } from 'material-ui/GridList';
 import IconButton from 'material-ui/IconButton';
+import Drawer from 'material-ui/Drawer';
 
-import firebase from './firebase.js';
 // Import material icons
-// import ContentClear from 'material-ui/svg-icons/content/clear';
-// import ActionPanTool from 'material-ui/svg-icons/action/pan-tool';
 import Clear from 'material-ui-icons//Clear';
+
+// Import firebase settings
+import firebase, { auth, provider } from './firebase.js';
 
 // Import google map settings and styles
 import {
@@ -21,103 +24,212 @@ import {
 // Import our components
 import SkateMap from './components/SkateMap';
 import AddSkateSpotDialog from './components/AddSkateSpotDialog';
-import AppBottomNavigation from './components/AppBottomNavigation';
+import ActionBar from './components/ActionBar';
+import AddSkateSpotForm from './components/AddSkateSpotForm';
+import CurrentSpot from './components/CurrentSpot';
 
-
+// Import CSS
 import './App.css';
-
 
 const styles = {
   root: {
     display: 'flex',
     flexWrap: 'wrap',
     // justifyContent: 'space-around',
-    justifyContent: 'flex-start',
+    zIndex: 2,
   },
   gridList: {
+    margin: '0px',
     width: '100%',
     height: '100%',
     overflowY: 'auto',
+    alignContent: 'flex-start',
   },
 };
 
-
+/**
+ * Class App - extends the React Component Class
+ */
 class App extends Component {
 
+  /**
+   * Create the App component and set the initial state
+   *
+   * @param {object} props - the props object passes
+   */
   constructor(props){
     super(props);
     this.state = {
-      currentSpotName: '',
-      sweetTricksVisible: false,
-      tilesData: this.props.tilesData,
+      user: null,
       userLocation: null,
+      currentSpot: {
+        name: '',
+        id: ''
+      },
+      sweetTricksVisible: false,
       fetchingLocation: false,
-      skateSpotsData: this.props.skateSpotsData,
       addSkateSpotDialogIsVisible: false,
       skateSpots: [],
       spotMedia: [],
+      spotInfo: null,
+      zoom: 11,
+      drawerOpen: false,
+      drawerContent: null,
+      drawerAnchor: 'left'
     }
   }
 
 
+  /**
+   * Create a ref to the map
+   */
+  onMapMounted = (ref) => {
+    this.skateMap = ref;
+  }
+
+
+  /**
+   * Create a ref to the new spot marker
+   */
+  onNewSpotMounted = (ref) => {
+    this.newSpotMarker = ref;
+  }
+
+
+  /**
+   * Login user
+   */
+  login = () => {
+    auth.signInWithPopup(provider)
+    .then((result) => {
+      const user = result.user;
+      this.setState({
+        user
+      });
+    });
+  }
+
+
+  /**
+   * Logout user
+   */
+  logout = () => {
+    auth.signOut()
+    .then(() => {
+      this.setState({
+        user: null
+      });
+    });
+  }
+
+  /**
+   * React lifecycle method called when the component mounts
+   */
   componentDidMount(){
+    const { spotMedia } = this.state;
+
     const skateSpotsRef = firebase.database().ref('spots');
+    const dbMediaRef = firebase.database().ref('spotMedia');
+    const imagesRef = firebase.storage().ref().child('spotMedia');
 
     skateSpotsRef.on('value', (snapshot) => {
+      console.log('got spots')
       let spots = snapshot.val();
       let newState = [];
       for (let spot in spots) {
         newState.push({
           id: spot,
           name: spots[spot].name,
-          position: spots[spot].position
+          position: spots[spot].position,
+          coverImageRef: spots[spot].coverImageRef,
+          description: spots[spot].description,
+          media: spots[spot].media
         });
       }
       this.setState({
-        skateSpots: newState
+        skateSpots: newState,
+        currentSpot: newState.find( (spot) => {
+          if (this.state.currentSpot) {
+            return spot.id === this.state.currentSpot.id;
+          } else {
+            return false;
+          }
+        }),
       });
     });
 
-    const dbMediaRef = firebase.database().ref('media');
-    const storageRef = firebase.storage().ref();
-    const imagesRef = storageRef.child('media');
 
-    dbMediaRef.on('value', (snapshot) => {
-      let media = snapshot.val();
-      let newState = [];
-
-      for (let content in media) {
-        const contentRef = imagesRef.child(media[content].name);
-        const dlUrl = contentRef.getDownloadURL().then((url => {
-          const meta = contentRef.getMetadata().then(meta => {
-            newState.push({
-              img: url,
-              name: contentRef.name,
-              points: 0,
-              type: meta.contentType,
-            })
-          });
-        }));
-
-        this.setState({
-          spotMedia: newState
-        })
+    // Listen for user
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        this.setState({ user });
       }
     });
+
+    // dbMediaRef.on('value', (snapshot) => {
+    //   console.log('got new media');
+    //   let media = snapshot.val();
+    //   let newState = [...spotMedia];
+    //   console.log(media);
+    //   console.log(newState);
+    //
+    //   for (let content in media) {
+    //     console.log(media[content].name);
+    //
+    //     imagesRef.child(media[content].name).getDownloadURL().then( url => {
+    //       imagesRef.child(media[content].name).getMetadata().then( meta => {
+    //         newState.push({
+    //           img: url,
+    //           name: media[content].name,
+    //           points: 0,
+    //           type: meta.contentType,
+    //         })
+    //       });
+    //     }).catch(error => {
+    //       console.log(error.code);
+    //     });
+    //
+    //     this.setState({
+    //       spotMedia: newState
+    //     })
+    //   }
+    // });
+
+    // this.setUserLocation();
   }
+
 
   /**
    * Toggle the tricks picture drawer
    *
    */
-  toggleTricksDrawer = (value) => this.setState({
-    currentSpotName: 'Spot name: ' + value,
-    sweetTricksVisible: !this.state.sweetTricksVisible
-  })
+  toggleTricksDrawer = (value) => {
+    const imagesRef = firebase.storage().ref().child('spotMedia');
+    const spotsRef = firebase.database().ref('spots');
+    // const currentSpotRed = spotsRef.child(value.id);
+    // console.log(currentSpotRed);
+
+    this.setState({
+      currentSpot: {
+        name: value.name,
+        id: value.id
+      },
+      sweetTricksVisible: !this.state.sweetTricksVisible
+    })
+  }
 
 
   /**
-   * Upvote the tile
+   * Toggle the camera ?
+   *
+   */
+  toggleCamera = () => {
+    this.videoInput.click();
+  }
+
+
+  /**
+   * Upvote a tile
    *
    */
   addPoint = (updatedTile) => {
@@ -137,34 +249,28 @@ class App extends Component {
    * Set the user location.
    */
   setUserLocation = () => {
-    const options = {
-      enableHighAccuracy: true,
-      timeout: 5000,
-      maximumAge: 0
-    };
+    // const options = {
+    //   enableHighAccuracy: true,
+    //   timeout: 5000,
+    //   maximumAge: 0
+    // };
 
+    // getCurrentPosition callback
     const setPosition = (pos) => {
-
       const position = {
         lat: pos.coords.latitude,
         lng: pos.coords.longitude,
       };
 
-      const addSpotMarker = {
-        id: uniqueId(),
-        name: '',
-        position: position
-      }
-
-      const updatesSkateSpots = [...this.state.skateSpotsData];
-      updatesSkateSpots.push(addSpotMarker);
-
-      this.skateMap.panTo(position);
-
       this.setState({
         userLocation: position,
-        skateSpotsData: updatesSkateSpots,
+        zoom: 13,
       });
+
+      if (this.skateMap){
+        this.skateMap.panTo(position);
+        // console.log(this.skateMap.setZoom(34));
+      }
     }
 
     const getPositionError = (error) => {
@@ -173,7 +279,7 @@ class App extends Component {
 
     if ("geolocation" in navigator) {
       console.log('geolocating...')
-      navigator.geolocation.getCurrentPosition(setPosition);
+      navigator.geolocation.getCurrentPosition(setPosition, getPositionError);
     } else {
       console.log('not geodude :()')
     }
@@ -181,85 +287,189 @@ class App extends Component {
 
 
   /**
-   * Toggle the camera ?
-   *
-   */
-  toggleCamera = () => {
-    this.videoInput.click();
-  }
-
-
-  /**
-   * Add a skate spot
-   *
-   */
-  addSkateSpot = (location) => {
-    this.toggleNewSpotDialogue(this.skateMap.getCenter().toJSON());
-  }
-
-
-  /**
-   * Set map reference
-   */
-  onMapMounted = (ref) => {
-    this.skateMap = ref;
-  }
-
-
-  /**
    * Toggle the New Skate Spot dialoge
    *
-   * @param LatLng position
    * @return void
    */
-  toggleNewSpotDialogue = (position) => {
+  addSkateSpot = () => {
+    console.log('addSkateSpot');
     this.setState({
-      newSkateSpotPosition: position,
-      addSkateSpotDialogIsVisible: !this.state.addSkateSpotDialogIsVisible
+      createSpot: true,
+      newSpotPosition: this.skateMap.getCenter().toJSON(),
+      zoom: 18,
+    })
+  }
+
+  cancelAddSkatSpot = () => {
+    this.setState({
+      createSpot: false,
+    });
+    this.closeDrawer();
+  }
+
+  addSpotInfo = (waddup) => {
+    if (!this.state.createSpot){
+      return;
+    }
+
+    this.openDrawer('bottom', 'newSpot');
+  }
+
+
+  viewSpot = (spot) => {
+    if (this.state.createSpot){
+      return;
+    }
+
+    this.setState({
+      currentSpot: spot
+    })
+
+    this.openDrawer('bottom', 'viewSpot');
+  }
+
+
+  hideSpotInfoDialog = (spotInfo) => {
+    // console.log(info.name);
+    this.setState({
+      addSkateSpotDialogIsVisible: false,
+      spotInfo,
     })
   }
 
 
-  handleFileInput = (files) => {
-    const file = this.videoInput.files[0];
-    // Create a root reference
-    var storageRef = firebase.storage().ref();
-    var fileRef = storageRef.child('media/' + file.name);
-    fileRef.put(file).then(function(snapshot) {
-      console.log('Uploaded a blob or file!');
-    });
-
-    const dbMediaRef = firebase.database().ref('media');
-    const media = {
-      name: file.name 
-    }
-    dbMediaRef.push(media);
+  openDrawer = (anchor, content) => {
+    this.setState({
+      drawerOpen: true,
+      drawerContent: content,
+      drawerAnchor: anchor,
+    })
   }
+
+
+  closeDrawer = () => {
+    this.setState({
+      drawerOpen: false,
+      drawerContent: null,
+    })
+  }
+
+
+  /**
+   *
+   */
+  saveNewSpot = (spotData) => {
+    console.log('saveNewSpot');
+    const itemsRef = firebase.database().ref('spots');
+    const item = {
+      position: this.newSpotMarker.getPosition().toJSON(),
+      createdBy: this.state.user.uid,
+      creatorDisplayName: this.state.user.displayName,
+      createOn: new Date().toISOString(),
+      name: spotData.name,
+      description: spotData.description,
+      mediaPathName: spotData.mediaPathName,
+      coverImageRef: spotData.coverImageRef,
+      // tags: this.state.spotInfo.tags || '',
+    }
+    itemsRef.push(item);
+
+    this.setState({
+      createSpot: false,
+      newSpotPosition: null,
+      drawerOpen: false,
+      drawerContent: null,
+    })
+
+  }
+
+
+  /**
+   *
+   */
+  handleFileInput = (files) => {
+    const { currentSpot } = this.state;
+    const file = this.videoInput.files[0];
+
+    // Create a root reference
+    const storageRef = firebase.storage().ref();
+    const fileRef = storageRef.child('spots/' + currentSpot.id + "/" + file.name);
+
+    // fileRef.put(file).then(snapshot => {
+    //   console.log('Uploaded a blob or file!');
+    // });
+
+    var uploadTask = fileRef.put(file);
+
+    // Register three observers:
+    // 1. 'state_changed' observer, called any time the state changes
+    // 2. Error observer, called on failure
+    // 3. Completion observer, called on successful completion
+    uploadTask.on('state_changed', function(snapshot){
+      // Observe state change events such as progress, pause, and resume
+      // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+      var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      console.log('Upload is ' + progress + '% done');
+      switch (snapshot.state) {
+        case firebase.storage.TaskState.PAUSED: // or 'paused'
+          console.log('Upload is paused');
+          break;
+        case firebase.storage.TaskState.RUNNING: // or 'running'
+          console.log('Upload is running');
+          break;
+        default:
+          break;
+      }
+    }, function(error) {
+      // Handle unsuccessful uploads
+    }, function() {
+      // Handle successful uploads on complete
+      // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+      // var downloadURL = uploadTask.snapshot.downloadURL;
+      const dbMediaRef = firebase.database().ref('spots/' + currentSpot.id ).child('media').push().key;
+
+      const media = {
+        name: file.name,
+        spotId: currentSpot.id,
+        spotName: currentSpot.name,
+        imagePath: 'spots/' + currentSpot.id + "/" + file.name,
+      }
+
+      let updates = {};
+      updates['spots/' + currentSpot.id + '/media/' + dbMediaRef] = media;
+      // dbMediaRef.set({
+      //   media: media
+      // });
+      firebase.database().ref().update(updates);
+    });
+  }
+
+
   /**
    * Render App Component
    *
    */
   render() {
     const {
-      currentSpotName,
+      currentSpot,
       sweetTricksVisible,
-      tilesData,
-      skateSpotsData,
       userLocation,
       addSkateSpotDialogIsVisible,
       newSkateSpotPosition,
       skateSpots,
-      spotMedia
+      createSpot,
+      newSpotPosition,
+      userInfo,
+      drawerContent
     } = this.state;
 
     // let sortedTiles = [...tilesData];
-    let sortedTiles = [...spotMedia];
-    sortedTiles.sort((a, b) => {
-      return b.points - a.points
-    });
+    // let sortedTiles = [...spotMedia];
+    // sortedTiles.sort((a, b) => {
+    //   return b.points - a.points
+    // });
 
-    let owner = sortedTiles.length > 0 ? sortedTiles[0] : "Not claimed";
-    // let owner = sortedTiles[0];
+    // let owner = sortedTiles.length > 0 ? sortedTiles[0] : "Not claimed";
 
     return (
 
@@ -270,43 +480,99 @@ class App extends Component {
           accept="video/*;capture=camcorder"
           ref={(input) => { this.videoInput = input }}
           onChange={this.handleFileInput}
+          hidden
         />
 
         <SkateMap
           googleMapURL={googleMapURL}
-          loadingElement={<div style={{ height: `100%` }} />}
+          loadingElement={<div style={{
+            height: `100%`,
+            width: `100%`,
+            display: 'flex',
+            justifyContent: 'center',
+            alignContent: 'center',
+            alignItems: 'center'
+           }} >
+           <ReactLoading
+             type="bubbles"
+             color="#444"
+             delay={0} />
+           </div>}
           containerElement={ <div style={ containerElementStyles } /> }
           mapElement={<div style={{ height: `100%` }} />}
           onMapMounted={this.onMapMounted}
+          onNewSpotMounted={this.onNewSpotMounted}
           isMarkerShown={true}
           handleClick={this.toggleTricksDrawer}
-          userLocation={userLocation}
           toggleNewSpotDialogue={this.toggleNewSpotDialogue}
           skateSpotsData={skateSpots}
+          viewSpot={this.viewSpot}
+          createSpot={createSpot}
+          newSpotPosition={newSpotPosition}
+          zoom={this.state.zoom}
         />
 
-        <AppBottomNavigation
+        <ActionBar
           addSkateSpot={this.addSkateSpot}
           setUserLocation={this.setUserLocation}
           toggleCamera={this.toggleCamera}
           tricksDrawerToggled={sweetTricksVisible}
+          login={this.login}
+          logout={this.logout}
+          userIsSignedIn={this.state.user}
+          createSpot={createSpot}
+          saveNewSpot={this.saveNewSpot}
+          addSpotInfo={this.addSpotInfo}
+          openDrawer={this.openDrawer}
+          viewingSpot={drawerContent === "viewSpot"}
+          style={drawerContent === "viewSpot" && this.state.user ? {zIndex: "1501"} : {}}
         />
 
         <AddSkateSpotDialog
           title={'New Spot'}
           isVisible={addSkateSpotDialogIsVisible}
           newSkateSpotPosition={newSkateSpotPosition}
-          toggle={this.toggleNewSpotDialogue}
-          // userLocation={userLocation}
+          toggle={this.addSpotInfo}
+          hide={this.hideSpotInfoDialog}
         />
 
+        <Drawer
+          anchor={this.state.drawerAnchor}
+          open={this.state.drawerOpen}
+          onRequestClose={this.closeDrawer}
+        >
+          <div className="DrawerControls">
+            <IconButton onClick={this.closeDrawer} >
+              <Clear />
+            </IconButton>
+          </div>
+          {
+            createSpot &&
+            drawerContent === "newSpot" &&
+            <AddSkateSpotForm
+              cancel={this.cancelAddSkatSpot}
+              saveSpot={this.saveNewSpot}
+            />
+          }
+          {
+            drawerContent === "viewSpot" &&
+            <CurrentSpot
+              spot={this.state.currentSpot}
+            />
+          }
+          {
+            userInfo &&
+            <p>User info</p>
+          }
+        </Drawer>
+
+        {/*
         <div className={"SweetTricks " + (sweetTricksVisible ? "is-visible" : "")}>
           <div className="SweetTricks__heading">
-            <p>{currentSpotName}<br />
-              {/* <span>owned by:&nbsp;</span>
-              <span>{" " + owner.name}</span> */}
+            <p>{currentSpot.name}<br />
+              <span>owned by:&nbsp;</span>
             </p>
-            <IconButton onClick={this.toggleTricksDrawer} >
+            <IconButton onClick={() => this.toggleTricksDrawer("")} >
               <Clear />
             </IconButton>
           </div>
@@ -331,15 +597,16 @@ class App extends Component {
                   </IconButton>
                   }
                 >
-                { tile.type == 'video/mp4' ?
-                  <video src={tile.img} controls />:
-                  <img src={tile.img} />
-                }
+                  {
+                    tile.type === 'video/mp4' ?
+                    <video src={tile.img} /> :
+                    <img src={tile.img} alt="" />
+                  }
                 </GridListTile>
               )
             }) }
           </GridList>
-        </div>
+        </div>*/}
       </div>
     );
   }

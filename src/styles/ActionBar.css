@@ -1,0 +1,7 @@
+.ActionBar {
+  padding: 6px;
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  background-color: hsla(360, 100%, 100%, 0.9);
+}

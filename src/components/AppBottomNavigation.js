@@ -5,7 +5,6 @@ import { withStyles } from 'material-ui/styles';
 // Import icons
 import AddLocation from 'material-ui-icons/AddLocation';
 import MyLocation from 'material-ui-icons/MyLocation';
-import AddAPhoto from 'material-ui-icons/AddAPhoto';
 import CameraAlt from 'material-ui-icons/CameraAlt';
 
 // Import Material-UI components
@@ -32,6 +31,7 @@ class AppBottomNavigation extends Component {
     const {
       setUserLocation,
       toggleCamera,
+      login,
       addSkateSpot,
     } = this.props;
 
@@ -48,6 +48,10 @@ class AppBottomNavigation extends Component {
         addSkateSpot();
         break;
 
+      case 'login':
+        login();
+        break;
+
       default:
         this.setState({
           value: value,
@@ -58,13 +62,10 @@ class AppBottomNavigation extends Component {
   render(){
     const classes = this.props.classes;
     const tricksDrawerToggled = this.props.tricksDrawerToggled;
-    const { value } = this.state;
-
-
 
     return (
       <div>
-      { !tricksDrawerToggled ? 
+      { !tricksDrawerToggled ?
       <BottomNavigation
         value={0}
         onChange={this.handleChange}
@@ -81,7 +82,13 @@ class AppBottomNavigation extends Component {
           icon={<MyLocation />}
           value="setUserLocation"
         />
-      </BottomNavigation> : 
+        <BottomNavigationButton
+          // showLabel={false}
+          label="sign in"
+          icon={<MyLocation />}
+          value="login"
+        />
+      </BottomNavigation> :
       <BottomNavigation
         value={0}
         onChange={this.handleChange}

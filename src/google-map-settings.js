@@ -2,8 +2,7 @@ export const googleMapURL = "https://maps.googleapis.com/maps/api/js?v=3.exp&lib
 
 export const containerElementStyles = {
   width: '100vw',
-  height: `100vh`,
-  position: 'absolute',
+  height: `calc(100% - 48px)`,
   top: 0,
   left: 0,
 }
