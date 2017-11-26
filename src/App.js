@@ -558,6 +558,7 @@ class App extends Component {
             drawerContent === "viewSpot" &&
             <CurrentSpot
               spot={this.state.currentSpot}
+              user={this.state.user}
             />
           }
           {

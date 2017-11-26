@@ -101,6 +101,13 @@ class CurrentSpot extends Component {
     };
   }
 
+  vote = (media, type) => {
+    if (this.props.user){
+      console.log(media, type);
+      console.log(this.props.user);
+    }
+  }
+
   save = () => {
     const mediaPathName = this.state.name + Date.now();
 
@@ -193,21 +200,25 @@ class CurrentSpot extends Component {
                         <img src={media.url} />
                       }
                     </div>
-                    {/*
-                    <div className="CurrentSpot__actions">
-                      <IconButton
-                        color="contrast"
-                        style={{opacity: "0.6"}}
-                      >
-                        <ArrowDownward />
-                      </IconButton>
-                      <IconButton
-                        color="contrast"
-                        style={{opacity: "0.6"}}
-                      >
-                        <ArrowUpward />
-                      </IconButton>
-                    </div> */}
+                    {
+                      this.props.user &&
+                      <div className="CurrentSpot__actions">
+                        <IconButton
+                          color="contrast"
+                          style={{opacity: "0.6"}}
+                          onClick={() => this.vote(media, 'down')}
+                        >
+                          <ArrowDownward />
+                        </IconButton>
+                        <IconButton
+                          color="contrast"
+                          style={{opacity: "0.6"}}
+                          onClick={() => this.vote(media, 'up')}
+                        >
+                          <ArrowUpward />
+                        </IconButton>
+                      </div> 
+                    }
                   </div>
                 )
               })
