@@ -58,7 +58,7 @@ class CurrentSpot extends Component {
       let getMediaUrlPromise = storageRef.child(media[content].imagePath).getDownloadURL().then( url => {
         console.log(url);
         return storageRef.child(media[content].imagePath).getMetadata().then( meta => {
-            return { ...media[content], url: url, type: meta.contentType, };
+            return { ...media[content], mediaId: content, url: url, type: meta.contentType, };
         })
       }).catch(error => {
         console.log(error.code);
@@ -103,8 +103,51 @@ class CurrentSpot extends Component {
 
   vote = (media, type) => {
     if (this.props.user){
-      console.log(media, type);
-      console.log(this.props.user);
+      console.log(media.mediaId, type);
+      console.log(this.props.user.uid);
+
+      if (!media.score || !media.upVoters || !media.downVoters) {
+        media.score = 0;
+        media.upVoters = [];
+        media.downVoters = [];
+      }
+
+      switch (type) {
+        case "down":
+          if (media.downVoters && media.downVoters.indexOf(this.props.user.uid) > -1){
+            break;
+          } else if (media.upVoters && media.upVoters.indexOf(this.props.user.uid) > -1 ){
+            const index = media.upVoters.indexOf(this.props.user.uid);
+            media.upVoters.splice( index, 1);
+            media.score = media.score - 2;
+            media.downVoters.push(this.props.user.uid);
+          } else {
+            media.score = media.score - 1;
+            media.downVoters.push(this.props.user.uid);
+          }
+          break;
+        case "up":
+          if (media.upVoters && media.upVoters.indexOf(this.props.user.uid) > -1){
+            break;
+          } else if (media.downVoters && media.downVoters.indexOf(this.props.user.uid) > -1 ){
+            const index = media.downVoters.indexOf(this.props.user.uid);
+            media.downVoters.splice( index, 1);
+            media.score = media.score + 2;
+            media.upVoters.push(this.props.user.uid);
+          } else {
+            media.score = media.score + 1;
+            media.upVoters.push(this.props.user.uid);
+          }
+          break;
+        default:
+          break;
+      }
+
+      let updates = {};
+      updates['spots/' + this.props.spot.id + '/media/' + media.mediaId] = media;
+      firebase.database().ref().update(updates);
+
+      console.log(media)
     }
   }
 
@@ -162,7 +205,15 @@ class CurrentSpot extends Component {
        name,
        description,
        media,
-     } = this.props.spot
+     } = this.props.spot;
+
+     // const sortedSpotMedia = spotMedia.map( (mediaItem) )
+     let sortedSpotMedia = [...spotMedia];
+     sortedSpotMedia.sort((a,b) => {
+       return b.score - a.score
+     });
+
+     console.log(sortedSpotMedia);
 
     return (
       <div className="CurrentSpot">
@@ -186,7 +237,7 @@ class CurrentSpot extends Component {
               </div>
             </div>
             <div className="CurrentSpot__media-wrapper">
-             { spotMedia.map( (media) => {
+             { sortedSpotMedia.map( (media) => {
                media.type ? console.log(media.type.indexOf('video')) : console.log('media');
                 return (
                   <div key={uniqueId()} className="CurrentSpot__media-container">
@@ -205,19 +256,35 @@ class CurrentSpot extends Component {
                       <div className="CurrentSpot__actions">
                         <IconButton
                           color="contrast"
-                          style={{opacity: "0.6"}}
+                          style={
+                            media.downVoters &&
+                            media.downVoters.indexOf(this.props.user.uid) > -1 ?
+                            {
+                              opacity: "1",
+                              color: "#FF0000"
+                            }:
+                            {opacity: "0.6"}
+                          }
                           onClick={() => this.vote(media, 'down')}
                         >
                           <ArrowDownward />
                         </IconButton>
                         <IconButton
                           color="contrast"
-                          style={{opacity: "0.6"}}
+                          style={
+                            media.upVoters &&
+                            media.upVoters.indexOf(this.props.user.uid) > -1 ?
+                            {
+                              opacity: "1",
+                              color: "#00FF00"
+                            }:
+                            {opacity: "0.6"}
+                          }
                           onClick={() => this.vote(media, 'up')}
                         >
                           <ArrowUpward />
                         </IconButton>
-                      </div> 
+                      </div>
                     }
                   </div>
                 )
